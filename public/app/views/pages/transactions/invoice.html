@@ -1,0 +1,254 @@
+<h2>Create Invoice</h2>
+
+<hr>
+
+<body>   
+
+<form>
+    <br>
+
+   
+    <div class="container">
+        <h5>Primary Information</h5>
+        <br>
+        <!-- Chapter -->
+        <div class="row">
+            <div class="col">
+                <!-- Chapter -->
+                <label>Chapter:</label>
+                <select class="formControl" name="repeatSelect" id="repeatSelect" ng-model="invoiceData.chapter">
+                    <option ng-repeat="l in chapter_list.langs" value="{{ l.value }}">{{ l.value }}</option>
+                </select>
+            </div>
+            <br>
+            <br>
+
+
+            <div class="col">
+                <!-- Member -->
+                <label>Member:</label>
+                <select  class="formControl" name="repeatSelect" id="repeatSelect" ng-model="invoiceData.member">
+                    <option ng-repeat="l in member_list.langs" value="{{ l.value }}">{{ l.value }}</option>
+                </select>
+                <br>
+                <br>
+            </div>
+        </div>
+
+
+        <div class="row">
+
+
+
+            <div class="col">
+                <!-- Due Date -->
+                <label>Billing Contact:</label>
+                <label ng-model="billing_contact" ng-show=invoiceData.member ng-repeat="l in member_list.langs | filter:{value:invoiceData.member}">{{ l.contact }}</label>
+ 
+            </div>
+            <br>
+            <br>
+             
+             <div class="col">
+                <!-- Due Date -->
+                <label>Billing Email:</label>
+                <label ng-model="billing_email" ng-show=invoiceData.member ng-repeat="l in member_list.langs | filter:{value:invoiceData.member}">{{ l.billing_email }}</label>
+ 
+            </div>
+           </div>
+
+
+        <hr>
+        <h5>Accounting Information</h5>  
+        <br> 
+
+        <!-- Chapter -->
+        <div class="row">
+            <div class="col">
+                <!-- Invoice Date -->
+                <label>Invoice Date:</label>
+                <input class="date" type="date" name="invoiceDate" placeholder="please enter invoide due date" ng-model="invoiceData.invoicedate">
+            </div>
+
+
+            <div class="col">
+                <!-- Invoice Terms -->
+                <!-- Update storage -->
+                <label>Terms:</label>
+                <select  class="formControl" name="repeatSelect" id="repeatSelect" ng-model="terms">
+                    <option ng-repeat="l in accounting_terms_list.langs" value="{{ l.value }}">{{ l.value }}</option>
+                </select>
+            </div>
+
+
+
+            <div class="col">
+                <!-- Due Date -->
+                <label>Invoice Due Date:</label>
+                <input class="date" type="date" name="invoiceDueDate" placeholder="please enter invoide due date" ng-model="invoiceData.invoiceduedate">
+
+            </div>
+
+        </div>
+
+
+            <br>
+            <br>
+
+        <div class="row">
+
+            <div class="col">
+                <!-- Balance Sheet Account -->
+                <!-- Update storage -->
+                <label>Posting Period:</label>
+
+                <label ng-model="posting_period" ng-show=invoiceData.invoicedate>{{ invoiceData.invoicedate| date:'MM-yyyy'}}</label>
+
+                <br>
+                <br>
+            </div>
+
+            <div class="col">
+                <!-- Balance Sheet Account -->
+                <!-- Update storage -->
+                <label>AR Account:</label>
+
+                <label ng-model="billing_email" ng-show=invoiceData.member ng-repeat="l in member_list.langs | filter:{value:invoiceData.member}">{{ l.ar_account_number }} - {{l.ar_account_name}}</label>
+
+                <br>
+                <br>
+            </div>
+
+            <div class="col">
+
+                <br>
+                <br>
+            </div>
+        </div>
+
+        <div class="row">
+
+        </div>
+
+
+        <hr>
+        <h5>Payment Information</h5>  
+        <br> 
+
+        <div class="row">
+            <div class="col">
+                <!-- Invoice Date -->
+                <label>Payment Method (TBD):</label>
+                <input class="date" type="text"">
+            </div>
+            <br>
+            <br>
+
+
+            <div class="col">
+                <!-- Invoice Terms -->
+                <!-- Update storage -->
+                <label>Currency:</label>
+                <input class="date" type="text"">
+                <br>
+                <br>
+            </div>
+        </div>    
+
+    <!-- Member -->
+<!--     <label>Member:</label>
+    <input class="form-control" type="text" name="member" placeholder="please enter member" ng-model="invoiceData.member">
+    <br> -->
+
+
+<hr>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <form>
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" ng-model="selectedAll" ng-click="checkAll()" /></th>
+                                        <th>Item</th>
+                                        <th>Quantity</th>
+                                        <th>Rate</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="personalDetail in personalDetails">
+                                        <td>
+                                            <input type="checkbox" ng-model="personalDetail.selected"/></td>
+                                        <td>
+<!--                                             <input type="text" class="form-control" ng-model="personalDetail.item" required></td> -->
+                                                <select  class="formControl" name="repeatSelect" id="repeatSelect" ng-model="personalDetail.item">
+        <option ng-repeat="l in items_list.langs" value="{{ l.value }}">{{ l.value }}</option>
+    </select></td>
+                                        <td>
+                                            <input type="number" class="form-control" ng-model="personalDetail.quantity" required></td>
+                                        <td>
+                                            <input type="number" class="form-control" ng-model="personalDetail.rate" required></td>
+                                        <td>{{ personalDetail.amount = personalDetail.quantity * personalDetail.rate}}</td>
+
+                                    </tr>
+<!-- 
+                                    <tr>
+                                         <td></td>
+                                         <td></td>
+                                         <td></td>
+                                          <td><b>Total: </b></td>
+                                          <td><b>{{invoiceData.totalamountdue=total()}}</b></td></b>
+                                    </tr> -->
+
+                                    <tr>
+                                        <th colspan="9">
+                                            <div class="row">
+                                                <div class="col-sm-6 order-number"></div>
+                                                <div class="col-sm-6 text-right order-total">Total: ${{invoiceData.totalamountdue=total()}}</div>
+                                            </div>
+                                        </th>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+
+                            <div class="form-group">
+                                <input ng-hide="!personalDetails.length" type="button" class="btn btn-danger pull-right" ng-click="remove()" value="Remove">
+                                <!-- <input type="submit" class="btn btn-primary addnew pull-right" value="Add New"> -->
+                                <td><button type="button" class="btn btn-primary" ng-click="addNew(personalDetails.length)">Add Another Item</button></td>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-primary" type="submit" ng-click="createinvalert(invoiceData)">Create Invoice</button>
+
+    </form>
+    <br>
+
+            <div class="row show-hide-message" ng-show="successMsg">
+        <div class="alert alert-success">{{successMsg}}</div>
+    </div>
+        
+        <br>
+
+    <div class="row show-hide-message" ng-show="errorMsg">
+        <div class="alert alert-danger">{{errorMsg}}</div>
+    </div>
+
+    <div class = "jumbotron text-center" ng-show="invoice.loading">
+    <span class = "glymphicon glymphicon-repeat spinner"></span>
+    <p>Loading...</p>
+
+</div>
+    <br>
+
+
+</body>
+
+
