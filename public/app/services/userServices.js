@@ -81,13 +81,13 @@ angular.module('userServices', [])
 	return userFactory;
 })
 
-.factory('Invoice', function($http) {
-	invoiceFactory = {};
+// .factory('Invoice', function($http) {
+// 	invoiceFactory = {};
 
-	//invoice.createInvoice(invoiceData)
-	invoiceFactory.create = function(invoiceData) {
-	return $http.post('/api/invoice', invoiceData);
-	}
+// 	//invoice.createInvoice(invoiceData)
+// 	invoiceFactory.create = function(invoiceData) {
+// 	return $http.post('/api/invoice', invoiceData);
+// 	}
 
-	return invoiceFactory;
-});
+// 	return invoiceFactory;
+// });

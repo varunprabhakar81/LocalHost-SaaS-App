@@ -47,9 +47,13 @@ angular.module('managementController', [])
     // Function: Show more results on page
     app.showMore = function(number) {
         app.showMoreError = false; // Clear error message
-        // Run functio only if a valid number above zero
+        // Run function only if a valid number above zero
+        console.log(number);
+
         if (number > 0) {
             app.limit = number; // Change ng-repeat filter to number requested by user
+        } else if (number == '') {
+            app.limit = undefined;
         } else {
             app.showMoreError = 'Please enter a valid number'; // Return error if number not valid
         }

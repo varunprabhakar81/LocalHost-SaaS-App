@@ -1,4 +1,4 @@
-angular.module('invoiceController', [])
+// angular.module('invoiceController', [])
 
-.controller('invoiceCtrl', function() {
-})
+// .controller('invoiceCtrl', function() {
+// })

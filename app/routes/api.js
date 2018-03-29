@@ -1,6 +1,6 @@
 var User = require('../models/user');
-var Invoice = require('../models/invoice');
-var InvoiceLines = require('../models/invoice-lines');
+// var Invoice = require('../models/invoice');
+// var InvoiceLines = require('../models/invoice-lines');
 var jwt = require('jsonwebtoken');
 var secret = 'harryporter';
 var nodemailer = require('nodemailer');
@@ -87,61 +87,61 @@ module.exports = function(router) {
 	});
 
 
-	//INVOICE CREATION ROUTE
-	router.post('/invoice',(req, res) => {
-		var invoice = new Invoice();
-		invoice.member = req.body.member;
-		invoice.invoicedate = req.body.invoicedate;
-		invoice.invoiceduedate = req.body.invoiceduedate;
-		invoice.chapter = req.body.chapter;
-		invoice.totalamountdue = req.body.totalamountdue;
+	// //INVOICE CREATION ROUTE
+	// router.post('/invoice',(req, res) => {
+	// 	var invoice = new Invoice();
+	// 	invoice.member = req.body.member;
+	// 	invoice.invoicedate = req.body.invoicedate;
+	// 	invoice.invoiceduedate = req.body.invoiceduedate;
+	// 	invoice.chapter = req.body.chapter;
+	// 	invoice.totalamountdue = req.body.totalamountdue;
 
 
-		if(req.body.member == null || req.body.member == ''
-		   || req.body.invoicedate == null || req.body.invoicedate == ''
-			|| req.body.invoiceduedate == null || req.body.invoiceduedate == ''
-			|| req.body.chapter == null || req.body.chapter == ''
-			|| req.body.totalamountdue == null || req.body.totalamountdue == ''
-			 ){
-			res.json({success: false, message:'Ensure all primary data is entered'})
-		}
-		else { 
-			invoice.save(function(err){
-				if(err) {
-					res.json({success: false, message: 'Failure occured!'+err});
-				} else {
-					res.json({success: true, message: 'Invoice Created!'});
-				}
-			});
-		}
-	});
+	// 	if(req.body.member == null || req.body.member == ''
+	// 	   || req.body.invoicedate == null || req.body.invoicedate == ''
+	// 		|| req.body.invoiceduedate == null || req.body.invoiceduedate == ''
+	// 		|| req.body.chapter == null || req.body.chapter == ''
+	// 		|| req.body.totalamountdue == null || req.body.totalamountdue == ''
+	// 		 ){
+	// 		res.json({success: false, message:'Ensure all primary data is entered'})
+	// 	}
+	// 	else { 
+	// 		invoice.save(function(err){
+	// 			if(err) {
+	// 				res.json({success: false, message: 'Failure occured!'+err});
+	// 			} else {
+	// 				res.json({success: true, message: 'Invoice Created!'});
+	// 			}
+	// 		});
+	// 	}
+	// });
 
 
-	//INVOICE LINES CREATION ROUTE
-	router.post('/invoice-lines',(req, res) => {
-		var invoice_lines = new InvoiceLines();
-		invoice_lines.item = req.body.item;
-		invoice_lines.quantity = req.body.quantity;
-		invoice_lines.rate = req.body.rate;
-		invoice_lines.amount = req.body.amount;
+	// //INVOICE LINES CREATION ROUTE
+	// router.post('/invoice-lines',(req, res) => {
+	// 	var invoice_lines = new InvoiceLines();
+	// 	invoice_lines.item = req.body.item;
+	// 	invoice_lines.quantity = req.body.quantity;
+	// 	invoice_lines.rate = req.body.rate;
+	// 	invoice_lines.amount = req.body.amount;
 
-		if(req.body.item == null || req.body.item == ''
-		   || req.body.quantity == null || req.body.quantity == ''
-			|| req.body.rate == null || req.body.rate == ''
-			|| req.body.amount == null || req.body.amount == ''
-			 ){
-			res.json({success: false, message:'Ensure all mandatory invoice line items are provided!'})
-		}
-		else { 
-			invoice_lines.save(function(err){
-				if(err) {
-					res.json({success: false, message: 'Failure occured!'+err});
-				} else {
-					res.json({success: true, message: 'Invoice Lines Created!'});
-				}
-			});
-		}
-	});
+	// 	if(req.body.item == null || req.body.item == ''
+	// 	   || req.body.quantity == null || req.body.quantity == ''
+	// 		|| req.body.rate == null || req.body.rate == ''
+	// 		|| req.body.amount == null || req.body.amount == ''
+	// 		 ){
+	// 		res.json({success: false, message:'Ensure all mandatory invoice line items are provided!'})
+	// 	}
+	// 	else { 
+	// 		invoice_lines.save(function(err){
+	// 			if(err) {
+	// 				res.json({success: false, message: 'Failure occured!'+err});
+	// 			} else {
+	// 				res.json({success: true, message: 'Invoice Lines Created!'});
+	// 			}
+	// 		});
+	// 	}
+	// });
 
 	//USER LOGIN ROUTE
 	router.post('/authenticate', function(req, res) {
@@ -149,23 +149,23 @@ module.exports = function(router) {
 			if(err) throw err;
 
 			if(req.body.username) {
+
 				if(!user) {
 					res.json({ success : false, message:'Could not authenticate user'});
-				} else if (user) {				
+				} else if (user) {	
 					if(req.body.password) {
-					 	var validPassword = user.comparePassword(req.body.password);
+						var validPassword = user.comparePassword(req.body.password);
+						if(!validPassword) {
+							res.json({ success: false, message: 'Could not authenticate password'});
+						} else if (!user.active) {
+							res.json({ success: false, message: 'Account is not yet activated, please check your e-mail for activation link.', expired: true});
+						} else {
+							var token = jwt.sign({username: user.username, email: user.email, name: user.name}, secret, {expiresIn: '24h'});
+							res.json({success: true, message: 'User authenticated!', token: token});
+						}
 					}
 					else {
 						res.json({ success: false, message: 'No password provided'});
-					}
-
-					if(!validPassword) {
-						res.json({ success: false, message: 'Could not authenticate password'});
-					} else if (!user.active) {
-						res.json({ success: false, message: 'Account is not yet activated, please check your e-mail for activation link.', expired: true});
-					} else {
-						var token = jwt.sign({username: user.username, email: user.email, name: user.name}, secret, {expiresIn: '24h'});
-						res.json({success: true, message: 'User authenticated!', token: token});
 					}
 				}
 			}
