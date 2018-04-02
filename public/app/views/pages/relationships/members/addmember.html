@@ -1,0 +1,59 @@
+<div class  "page-header" > 
+
+<h1>Create Member</h1>
+
+</div>
+
+<form name ="memberAddForm" ng-submit ="member.addMember(memberData, memberAddForm.$valid)" novalidate>
+	<div class="form-group" ng-class="{'has-error': (!memberAddForm.membername.$valid && !memberAddForm.membername.$pristine) || (!memberAddForm.membername.$valid && memberAddForm.$submitted) , 'has-success': memberAddForm.membername.$valid && !memberAddForm.membername.$pristine}">
+
+		
+		<label>Member Name:</label>
+		<input class="form-control" type="text" name="membername" placeholder="please enter member name" ng-model="member.memberData.membername" ng-pattern="/^[a-zA-Z\d\-_\s]+$/" required>
+		<p class="help-block" ng-show="(!memberAddForm.membername.$pristine && memberAddForm.membername.$error.required) || (memberAddForm.$submitted && memberAddForm.membername.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!memberAddForm.membername.$pristine && memberAddForm.membername.$error.pattern)" class="help-block">
+			<li> Must not contain any special characters</li>
+		</ul>
+
+	</div>
+
+	<div class="form-group" ng-class="{'has-error': (!memberAddForm.email.$valid && !memberAddForm.email.$pristine) || (!memberAddForm.email.$valid && memberAddForm.$submitted) , 'has-success': memberAddForm.email.$valid && !memberAddForm.email.$pristine}">
+
+		
+		<label>Email:</label>
+		<input class="form-control" type="text" name="email" placeholder="please enter member email" ng-model="member.memberData.email" ng-pattern="/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/" required>
+		<p class="help-block" ng-show="(!memberAddForm.email.$pristine && memberAddForm.email.$error.required) || (memberAddForm.$submitted && memberAddForm.email.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!memberAddForm.email.$pristine && memberAddForm.email.$error.pattern)" class="help-block">
+			<li> Must contain '@'</li>
+			<li> Must not contain any special characters</li>
+			<li> Must be at least 3 characters but no more than 40</li>
+		</ul>
+
+	</div>
+	<br>
+	
+	<button ng-disabled="register.disabled" class="btn btn-primary" type="submit">Create Member</button>
+</form>
+
+
+<br>
+
+
+<div class = "jumbotron text-center" ng-show="member.loading">
+	<span class = "glymphicon glymphicon-repeat spinner"></span>
+	<p>Loading...</p>
+
+</div>
+<br>
+
+<div class="row show-hide-message" ng-show="member.successMsg">
+	<div class="alert alert-success">{{member.successMsg}}</div>
+</div>
+	
+	<br>
+
+<div class="row show-hide-message" ng-show="member.errorMsg">
+	<div class="alert alert-danger">{{member.errorMsg}}</div>
+</div>

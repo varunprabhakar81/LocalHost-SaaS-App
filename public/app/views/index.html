@@ -29,11 +29,17 @@
   <script src="app/controllers/mainCtrl.js"></script>
   <script src="app/controllers/emailCtrl.js"></script>
   <script src="app/controllers/managementCtrl.js"></script>
+  <script src="app/controllers/chapterCtrl.js"></script>
+  <script src="app/controllers/memberCtrl.js"></script>
+  <script src="app/controllers/invoiceCtrl.js"></script>
+
   <!-- <script src="app/controllers/invoiceCtrl.js"></script> -->
 
   <!-- Angular Services -->
   <script src="app/services/userServices.js"></script>
   <script src="app/services/authServices.js"></script>
+  <script src="app/services/chapterServices.js"></script>
+  <script src="app/services/memberServices.js"></script>
   
 
   <title>SaaS Prototype</title>
@@ -61,48 +67,58 @@
         <li class="nav-item active">
           <a class="nav-link" ng-show="main.isLoggedIn" href="#" ng-click="main.logout()">Logout <span class="sr-only">(current)</span></a>
         </li>
-        <li class="nav-item active">
-          <a class="nav-link" ng-show="main.isLoggedIn && main.authorized" href="/management">Management<span class="sr-only">(current)</span></a>
-        </li>
-
-
 
 <!--         <li class="nav-item active">
           <a class="nav-link" ng-show="main.isLoggedIn" href="/invoice">Create Invoice <span class="sr-only">(current)</span></a>
         </li> -->
 
-        <li class="nav-item active">
+<!--         <li class="nav-item active">
           <a class="nav-link" ng-show="main.isLoggedIn" href="/invoice_second">Create Invoice - 2 <span class="sr-only">(current)</span></a>
-        </li>
-
+        </li> -->
+<!-- 
         <li class="nav-item active">
           <a class="nav-link" ng-show="main.isLoggedIn" href="/transactions/invoice">Create Invoice <span class="sr-only">(current)</span></a>
-        </li>
+        </li> -->
 
 
 
-       <li class="nav-item dropdown active">
+       <li class="nav-item dropdown active" ng-show="main.isLoggedIn">
           <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Transactions</a>
           <div class="dropdown-menu" aria-labelledby="dropdown01">
-            <a class="dropdown-item" href="#">Invoices</a>
-            <a class="dropdown-item" href="#">Payments</a>
-            <a class="dropdown-item" href="#">Journals</a>
+            <a class="dropdown-item" href="/transactions/invoice">Invoice</a>
+            <a class="dropdown-item" href="#">Payment</a>
+            <a class="dropdown-item" href="#">Journal</a>
           </div>
         </li>
 
-        <li class="nav-item dropdown active">
+<!--         <li class="nav-item dropdown active" ng-show="main.isLoggedIn">
           <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Master Data</a>
           <div class="dropdown-menu" aria-labelledby="dropdown01">
-            <a class="dropdown-item" href="#">Chapters</a>
             <a class="dropdown-item" href="#">Members</a>
             <a class="dropdown-item" href="#">Revenue Items</a>
             <a class="dropdown-item" href="#">Chart of Accounts</a>
           </div>
+        </li> -->
+        
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" ng-show="main.isLoggedIn && main.authorized" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Manage Relationships</a>
+          <div class="dropdown-menu" aria-labelledby="dropdown01">
+            <a class="dropdown-item" href="/managemembers">Manage Members</a>
+            <a class="dropdown-item" href="/managechapters">Manage Vendors</a>
+            <a class="dropdown-item" href="/management">Manage Contacts</a>
+            <a class="dropdown-item" href="/management">Manage Employees</a>
+          </div>
         </li>
 
-        <li class="nav-item active">
-        <a class="nav-link" ng-show="main.isLoggedIn" href="profile">Profile<span class="sr-only">(current)</span></a>
-      </ul>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" ng-show="main.isLoggedIn && main.authorized" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Administration</a>
+          <div class="dropdown-menu" aria-labelledby="dropdown01">
+            <a class="dropdown-item" href="/profile">Profile</a>
+            <a class="dropdown-item" href="/managechapters">Manage Chapters</a>
+            <a class="dropdown-item" href="/management">Manage Users</a>
+          </div>
+        </li>
+
     </div>
 
   </div>

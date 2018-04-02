@@ -1,0 +1,57 @@
+<div class  "page-header" > 
+
+<h1>Create Chapter</h1>
+
+</div>
+
+<form name ="chapterAddForm" ng-submit ="chapter.addChapter(chapterData, chapterAddForm.$valid)" novalidate>
+	<div class="form-group" ng-class="{'has-error': (!chapterAddForm.chaptername.$valid && !chapterAddForm.chaptername.$pristine) || (!chapterAddForm.chaptername.$valid && chapterAddForm.$submitted) , 'has-success': chapterAddForm.chaptername.$valid && !chapterAddForm.chaptername.$pristine}">
+
+		
+		<label>Chapter Name:</label>
+		<input class="form-control" type="text" name="chaptername" placeholder="please enter chapter name" ng-model="chapter.chapterData.chaptername" ng-pattern="/^[a-zA-Z\d\-_\s]+$/" required>
+		<p class="help-block" ng-show="(!chapterAddForm.chaptername.$pristine && chapterAddForm.chaptername.$error.required) || (chapterAddForm.$submitted && chapterAddForm.chaptername.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!chapterAddForm.chaptername.$pristine && chapterAddForm.chaptername.$error.pattern)" class="help-block">
+			<li> Must not contain any special characters</li>
+		</ul>
+
+	</div>
+
+	<div class="form-group" ng-class="{'has-error': (!chapterAddForm.website.$valid && !chapterAddForm.website.$pristine) || (!chapterAddForm.website.$valid && chapterAddForm.$submitted) , 'has-success': chapterAddForm.website.$valid && !chapterAddForm.website.$pristine}">
+
+		
+		<label>Website:</label>
+		<input class="form-control" type="text" name="website" placeholder="please enter chapter website" ng-model="chapter.chapterData.website" ng-pattern="/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/" required>
+		<p class="help-block" ng-show="(!chapterAddForm.website.$pristine && chapterAddForm.website.$error.required) || (chapterAddForm.$submitted && chapterAddForm.website.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!chapterAddForm.website.$pristine && chapterAddForm.website.$error.pattern)" class="help-block">
+			<li> Please enter valid website format</li>
+		</ul>
+
+	</div>
+	<br>
+	
+	<button ng-disabled="register.disabled" class="btn btn-primary" type="submit">Create Chapter</button>
+</form>
+
+
+<br>
+
+
+<div class = "jumbotron text-center" ng-show="chapter.loading">
+	<span class = "glymphicon glymphicon-repeat spinner"></span>
+	<p>Loading...</p>
+
+</div>
+<br>
+
+<div class="row show-hide-message" ng-show="chapter.successMsg">
+	<div class="alert alert-success">{{chapter.successMsg}}</div>
+</div>
+	
+	<br>
+
+<div class="row show-hide-message" ng-show="chapter.errorMsg">
+	<div class="alert alert-danger">{{chapter.errorMsg}}</div>
+</div>

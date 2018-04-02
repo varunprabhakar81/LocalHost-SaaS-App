@@ -42,6 +42,7 @@ angular.module('managementController', [])
         });
     }
 
+
     getUsers(); // Invoke function to get users from databases
 
     // Function: Show more results on page

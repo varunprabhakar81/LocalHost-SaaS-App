@@ -1,0 +1,70 @@
+<div class  "page-header" > 
+    <h1>Edit Chapter</h1>
+</div>
+
+<br>
+
+<nav>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <a class="nav-item nav-link nameTab" ng-click="editChapter.chapternamePhase();" ng-class="chapternameTab" data-toggle="tab" href="#" role="presentation" aria-controls="chapternameTab">Primary Information</a>
+    <a class="nav-item nav-link websiteTab" ng-click="editChapter.websitePhase();" ng-class="websiteTab" data-toggle="tab" href="#" role="presentation" aria-controls="usernameTab">Additional Information</a>
+  </div>
+</nav>
+
+
+
+<!-- Phase One: Name -->
+<form name="editChapter.chapternameForm" ng-show="editChapter.phase1" ng-submit="editChapter.updateChapterName(newChapterName, editChapter.chapternameForm.chaptername.$valid)" novalidate>
+    <!-- Name Div -->
+    <div ng-class="{ 'has-success':(editChapter.chapternameForm.chaptername.$valid && !editChapter.chapternameForm.chaptername.$pristine), 'has-error':(!editChapter.chapternameForm.chaptername.$valid && !editChapter.chapternameForm.chaptername.$pristine) || (!chapternameForm.chaptername.$valid && chapternameForm.$submitted) }">
+        <!-- Name Input -->
+        <label>Chapter Name:</label>
+        <input ng-disabled="editChapter.disabled" class="form-control" type="text" name="chaptername" placeholder="please enter chapter name" ng-model="newChapterName" ng-pattern="/^[a-zA-Z\d\-_\s]+$/" required>
+        <!-- Name Validation -->
+        <p class="help-block" ng-show="(!editChapter.chapternameForm.chaptername.$pristine && chapternameForm.chaptername.$error.required) || (editChapter.chapternameForm.$submitted && editChapter.chapternameForm.chaptername.$error.required)">This field is required</p>
+        <ul ng-show="(!editChapter.chapternameForm.chaptername.$pristine && editChapter.chapternameForm.chaptername.$error.pattern)" class="help-block">
+            <li> Must not contain any special characters</li>
+        </ul>
+    </div>
+    <!-- Name Input -->
+    <br>
+    <!-- Submit Button -->
+    <button ng-disabled="editChapter.disabled" class="btn btn-primary" type="submit">Update</button>
+</form>
+<!-- Phase One: Name -->
+
+
+<!-- Phase One: Name -->
+<form name="editChapter.websiteForm" ng-show="editChapter.phase2" ng-submit="editChapter.updateWebsite(newWebsite, editChapter.websiteForm.website.$valid)" novalidate>
+    <!-- Name Div -->
+    <div ng-class="{ 'has-success':(editChapter.websiteForm.website.$valid && !editChapter.websiteForm.website.$pristine), 'has-error':(!editChapter.websiteForm.website.$valid && !editChapter.websiteForm.website.$pristine) || (!websiteForm.website.$valid && websiteForm.$submitted) }">
+        <!-- Name Input -->
+        <label>Chapter Website:</label>
+        <input ng-disabled="editChapter.disabled" class="form-control" type="text" name="website" placeholder="please enter chapter website" ng-model="newWebsite" ng-pattern="/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/" required>
+        <!-- Name Validation -->
+        <p class="help-block" ng-show="(!editChapter.websiteForm.website.$pristine && websiteForm.website.$error.required) || (editChapter.websiteForm.$submitted && editChapter.websiteForm.website.$error.required)">This field is required</p>
+        <ul ng-show="(!editChapter.websiteForm.website.$pristine && editChapter.websiteForm.website.$error.pattern)" class="help-block">
+            <li> Please enter valid website format</li>
+        </ul>
+    </div>
+    <!-- Name Input -->
+    <br>
+    <!-- Submit Button -->
+    <button ng-disabled="editChapter.disabled" class="btn btn-primary" type="submit">Update</button>
+</form>
+
+<br>
+
+<!-- Custom Success Message -->
+<div class="row show-hide-message" ng-show="editChapter.successMsg">
+    <div class="alert alert-success">{{ editChapter.successMsg }}</div>
+</div>
+<!-- Custom Success Message -->
+
+<br>
+
+<!-- Custom Error Message -->
+<div class="row show-hide-message" ng-show="editChapter.errorMsg">
+    <div class="alert alert-danger">{{ editChapter.errorMsg }}</div>
+</div>
+<!-- Custom Error Message -->

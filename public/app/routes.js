@@ -173,6 +173,54 @@ var app = angular.module('appRoutes',['ngRoute'])
         permission: ['admin', 'moderator']
     })
 
+	.when('/addchapter', {
+		templateUrl: 'app/views/pages/administration/chapter/chapteradd.html',
+		controller: 'chapterCtrl',
+		controllerAs: 'chapter',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
+	.when('/managechapters', {
+		templateUrl: 'app/views/pages/administration/chapter/managechapters.html',
+		controller: 'chapterCtrl',
+		controllerAs: 'chapter',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
+    .when('/editchapter/:id', {
+        templateUrl: 'app/views/pages/administration/chapter/editchapter.html',
+        controller: 'editChapterCtrl',
+        controllerAs: 'editChapter',
+        authenticated: true,
+        permission: ['admin', 'moderator']
+    })
+
+	.when('/addmember', {
+		templateUrl: 'app/views/pages/relationships/members/addmember.html',
+		controller: 'memberCtrl',
+		controllerAs: 'member',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
+	.when('/managemembers', {
+		templateUrl: 'app/views/pages/relationships/members/managemembers.html',
+		controller: 'memberCtrl',
+		controllerAs: 'member',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
+    .when('/editmember/:id', {
+        templateUrl: 'app/views/pages/relationships/members/editmember.html',
+        controller: 'editMemberCtrl',
+        controllerAs: 'editMember',
+        authenticated: true,
+        permission: ['admin', 'moderator']
+    })
+
 	.otherwise({ redirectTo: '/'});
 
 	$locationProvider.html5Mode({

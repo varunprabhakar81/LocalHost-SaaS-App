@@ -1,0 +1,148 @@
+<div class  "page-header" > 
+	<h1>Manage Members</h1>
+</div>
+
+<br>
+
+<div class="showmore">
+	<div class="col-lg-6">
+		<form>
+			<div class="form-row">
+				
+				<div class="col">
+					<span class="input-group-text"> Results to display:</span>
+				</div>
+				<div class="col">
+					<input type="text" class="form-control" ng-model="number">&nbsp&nbsp
+				</div>
+				<div class="col">
+					<button type="submit" ng-click="member.showMore(number);" class="btn btn-success">Apply Filter</button>
+				</div>
+				<div class="col">
+					<button type="button" ng-click="member.showAll(number);" class="btn btn-warning">Show All</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<nav class="navbar navbar-light">
+	<form class="form-inline">
+		<input class="form-control mr-sm-2" type="search" placeholder="Search for..." aria-label="Search" ng-model="searchKeyword">
+		<button class="btn btn-outline-secondary my-2 my-sm-0" type="submit" ng-click="member.search(searchKeyword, number);">Search</button>&nbsp
+		<button class="btn btn-outline-secondary my-2 my-sm-0" type="button" ng-click="member.clear();">Clear</button>&nbsp
+		<!-- Advanced Search Button -->
+		<!-- <a href="/search">
+			<button type="button" class="btn btn-outline-secondary my-2 my-sm-0">Advanced Search</button>
+		</a> -->
+
+	</form>
+</nav>
+
+<!-- Total Search Results -->
+<div ng-show="searchFilter !== undefined">
+	<p><strong>Total results: </strong>{{ (member.members | filter: searchFilter).length }}</p>
+
+</div>
+
+<!-- Results Being Shown -->
+<div ng-show="searchFilter !== undefined">
+	<p><strong>Showing: </strong>{{( member.members | filter: searchFilter | limitTo: member.limit).length }}</p>
+</div>
+
+
+
+<!-- Custom Error Message -->
+<div class="row show-hide-message" ng-show="member.showMoreError">
+	<div class="alert alert-danger">{{ member.showMoreError }}</div>
+</div>
+
+<br>
+
+<div class="panel panel-primary">
+	<p align = "right">
+		<a href="/addmember" align="right">
+			<button type="button" ng-show="member.editAccess" align="right" class="btn btn-primary">Add Member</button>
+		</a>
+	</p>
+
+
+	<table class="table table-striped">
+		<tr>
+			<th>Member Name</th>
+			<th>Email</th>
+			<th></th>	
+		</tr>
+		<tr ng-repeat="mem in member.members |filter: searchFilter |limitTo: member.limit">
+			<td>{{mem.membername }}</td>
+			<td>{{mem.email}}</td>
+			<td>
+				<a href="/editmember/{{mem._id}}">
+					<button type="button" ng-show="member.editAccess" class="btn btn-primary">Edit</button>
+				</a>
+				<button type="button" ng-click = "member.deleteMember(mem.membername);" ng-show="member.deleteAccess" class="btn btn-danger">Delete</button>
+<!-- 				<a href="/edit/{{member._id}}">
+					<button type="button" ng-show="management.editAccess" class="btn btn-primary">Edit</button>
+				</a> -->
+				<!-- <button type="button" ng-click="management.deleteUser(person.username);" ng-show="management.deleteAccess" class="btn btn-danger">Delete</button> -->
+			</td>
+		</tr>
+	</table>
+
+</div>
+
+<br>
+<div class="showmore">
+	<div class="col-lg-6">
+		<div class="input-group">
+			<span class="input-group-text"> Results to display:</span>
+			<input type="text" class="form-control" ng-model="number">&nbsp&nbsp
+			<button type="button" ng-click="member.showMore(number);" class="btn btn-success ">Apply Filter</button>
+			<button type="button" ng-click="member.showAll(number);" class="btn btn-warning">Show All</button>
+		</div>
+	</div>
+</div>
+
+
+
+    <!-- BootstrapJS Modal -->
+    <div class="modal fade" id="memModal" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+<!--             <button ng-hide="main.hideButton" type="button" ng-click="main.endSession();" class="close" data-dismiss="modal">&times;</button> -->
+            <!-- Modal Header -->
+            <h4 class="modal-title">Edit Member</h4>
+          </div>
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <p>Edit Member Details</p>
+          </div>
+          <div class="modal-footer">
+            <!-- Modal 'Yes' & 'No' Buttons -->
+            <button type="button" ng-click="" class="btn btn-primary" data-dismiss="modal">Ok</button>
+            <button type="button" ng-click="" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- BootstrapJS Modal -->
+
+
+
+<!-- $scope.showMemberModal = function() {
+  $scope.showMemberEditModal = true;
+};
+
+$scope.updateMember = function() {
+	//edit member
+  $scope.showMemberEditModal = false;
+};
+
+$scope.cancelMemberUpdate = function() {
+  $scope.showMemberEditModal = false;
+}; -->
+

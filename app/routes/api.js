@@ -1,4 +1,6 @@
 var User = require('../models/user');
+var Chapter = require('../models/chapter')
+var Member = require('../models/member')
 // var Invoice = require('../models/invoice');
 // var InvoiceLines = require('../models/invoice-lines');
 var jwt = require('jsonwebtoken');
@@ -85,63 +87,6 @@ module.exports = function(router) {
 			});
 		}
 	});
-
-
-	// //INVOICE CREATION ROUTE
-	// router.post('/invoice',(req, res) => {
-	// 	var invoice = new Invoice();
-	// 	invoice.member = req.body.member;
-	// 	invoice.invoicedate = req.body.invoicedate;
-	// 	invoice.invoiceduedate = req.body.invoiceduedate;
-	// 	invoice.chapter = req.body.chapter;
-	// 	invoice.totalamountdue = req.body.totalamountdue;
-
-
-	// 	if(req.body.member == null || req.body.member == ''
-	// 	   || req.body.invoicedate == null || req.body.invoicedate == ''
-	// 		|| req.body.invoiceduedate == null || req.body.invoiceduedate == ''
-	// 		|| req.body.chapter == null || req.body.chapter == ''
-	// 		|| req.body.totalamountdue == null || req.body.totalamountdue == ''
-	// 		 ){
-	// 		res.json({success: false, message:'Ensure all primary data is entered'})
-	// 	}
-	// 	else { 
-	// 		invoice.save(function(err){
-	// 			if(err) {
-	// 				res.json({success: false, message: 'Failure occured!'+err});
-	// 			} else {
-	// 				res.json({success: true, message: 'Invoice Created!'});
-	// 			}
-	// 		});
-	// 	}
-	// });
-
-
-	// //INVOICE LINES CREATION ROUTE
-	// router.post('/invoice-lines',(req, res) => {
-	// 	var invoice_lines = new InvoiceLines();
-	// 	invoice_lines.item = req.body.item;
-	// 	invoice_lines.quantity = req.body.quantity;
-	// 	invoice_lines.rate = req.body.rate;
-	// 	invoice_lines.amount = req.body.amount;
-
-	// 	if(req.body.item == null || req.body.item == ''
-	// 	   || req.body.quantity == null || req.body.quantity == ''
-	// 		|| req.body.rate == null || req.body.rate == ''
-	// 		|| req.body.amount == null || req.body.amount == ''
-	// 		 ){
-	// 		res.json({success: false, message:'Ensure all mandatory invoice line items are provided!'})
-	// 	}
-	// 	else { 
-	// 		invoice_lines.save(function(err){
-	// 			if(err) {
-	// 				res.json({success: false, message: 'Failure occured!'+err});
-	// 			} else {
-	// 				res.json({success: true, message: 'Invoice Lines Created!'});
-	// 			}
-	// 		});
-	// 	}
-	// });
 
 	//USER LOGIN ROUTE
 	router.post('/authenticate', function(req, res) {
@@ -349,7 +294,6 @@ module.exports = function(router) {
 
 	// Route to send reset link to the user
 	router.put('/resetpassword', function(req, res) {
-		console.log('before  db error');
 		User.findOne({ username: req.body.username }).select('username active email resettoken name').exec(function(err, user) {
 			if (err) throw err; // Throw error if cannot connect
 			if (!user) {
@@ -387,7 +331,6 @@ module.exports = function(router) {
 		User.findOne({ resettoken: req.params.token }).select().exec(function(err, user) {
 			if (err) throw err; // Throw err if cannot connect
 			var token = req.params.token; // Save user's token from parameters to variable
-			console.log(token);
 			// Function to verify token
 			jwt.verify(token, secret, function(err, decoded) {
 				if (err) {
@@ -755,6 +698,354 @@ module.exports = function(router) {
         });
     });
 
+	
+	//Chapter Post Route
+	router.post('/addchapter',(req, res) => {
+		var chapter = new Chapter();
+		chapter.chaptername = req.body.chaptername;
+		chapter.website = req.body.website;
+	
+		if(req.body.chaptername == null || req.body.chaptername == '' || req.body.website == null || req.body.website == ''){
+			res.json({success: false, message:'Ensure Chapter Name and Website are provided'})
+		}
+		else { 
+			chapter.save(function(err){
+				if (err) {
+					if (err.errors != null) {
+						if (err.errors.chaptername) {
+						res.json({success: false, message: err.errors.chaptername.message});
+						} else if (err.errors.website) {
+							res.json({success: false, message: err.errors.website.message});
+						} else {
+							res.json({success: false, message: err});
+						}
+					} else if(err) {
+						console.log(err);
+						res.json({success: false, message: err.errmsg});
+					}
+
+				}
+				else {
+					console.log(err);
+					res.json({success: true, message: 'Chapter created!'});
+				}
+			});
+		}
+	});
+
+	router.get('/getchapters/', function(req, res) {
+		Chapter.find({}, function(err, chapters) {
+			if (err) throw err; // Throw error if cannot connect
+
+			User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+				if (err) throw err;
+				if(!mainUser) {
+					res.json({success: false, message: 'No user found'});
+				} else {
+					if (mainUser.permission === 'admin' || mainUser.permission == 'moderator') {
+						if(!chapters) {
+							res.json({success: false, message: 'No chapters found'});
+						} else {
+							res.json({success: true, chapters: chapters, permission: mainUser.permission});
+				
+						}
+					} else {
+						res.json({success: false, message: 'Insufficient Permissions'});
+					}
+				}
+			});
+		});
+	});
+
+
+	router.delete('/deletechapter/:chaptername', function(req, res) {
+		var deletedChapter = req.params.chaptername;
+
+		User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+			if (err) throw err;
+			if (!mainUser) {
+				res.json({success: false, message: 'No user found'});
+			} else {
+				if (mainUser.permission != 'admin') {
+					res.json({success: false, message: 'Insufficient Permissions'});
+				} else {
+					Chapter.findOneAndRemove({ chaptername: deletedChapter }, function(err, user) {
+						if(err) throw err;
+						res.json({success: true});
+					});
+				}
+			}
+		});
+	});
+
+
+    // Route to get the chapter that needs to be edited
+    router.get('/editchapter/:id', function(req, res) {
+        var editChapter = req.params.id; // Assign the _id from parameters to variable
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw error if cannot connect
+            // Check if logged in user was found in database
+            if (!mainUser) {
+                res.json({ success: false, message: 'No user found' }); // Return error
+            } else {
+                // Check if logged in user has editing privileges
+                if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+                    // Find the user to be editted
+                    Chapter.findOne({ _id: editChapter }, function(err, chapter) {
+                        if (err) throw err; // Throw error if cannot connect
+                        // Check if user to edit is in database
+                        if (!chapter) {
+                            res.json({ success: false, message: 'No chapter found' }); // Return error
+                        } else {
+                            res.json({ success: true, chapter: chapter }); // Return the user to be editted
+                        }
+                    });
+                } else {
+                    res.json({ success: false, message: 'Insufficient Permissions' }); // Return access error
+                }
+            }
+        });
+    });
+
+
+ 	// Route to update/edit a chapter
+    router.put('/editchapter', function(req, res) {
+        var editChapter = req.body._id;
+        if (req.body.chaptername) var newChapterName = req.body.chaptername;
+        if (req.body.website) var newWebsite = req.body.website;
+
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw err if cannot connnect
+            // Check if logged in user is found in database
+            if (!mainUser) {
+                res.json({ success: false, message: "no user found" }); // Return erro
+            } else {
+                if (newChapterName) {
+                    // Check if person making changes has appropriate access
+                    if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+						Chapter.findOne({ _id: editChapter }, function(err, chapter) {
+                            if (err) throw err; // Throw error if cannot connect
+                            if (!chapter) {
+                                res.json({ success: false, message: 'No chapter found' }); // Return error
+                            } else {
+                                chapter.chaptername = newChapterName; // Assign new name to user in database
+                                // Save changes
+                                chapter.save(function(err) {
+                                    if (err) {
+                                        console.log(err); // Log any errors to the console
+                                    } else {
+                                        res.json({ success: true, message: 'Chapter Name has been updated!' }); // Return success message
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+                    }
+                }
+
+                if (newWebsite) {
+                    // Check if person making changes has appropriate access
+                    if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+                        // Look for user in database
+                        Chapter.findOne({ _id: editChapter }, function(err, chapter) {
+                            if (err) throw err; // Throw error if cannot connect
+                            // Check if chapter is in database
+                            if (!chapter) {
+                                res.json({ success: false, message: 'No user found' }); // Return error
+                            } else {
+                                chapter.website = newWebsite;
+                                // Save changes
+                                chapter.save(function(err) {
+                                    if (err) {
+                                        console.log(err); // Log error to console
+                                    } else {
+                                        res.json({ success: true, message: 'Website has been updated' }); // Return success
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+                    }
+                }
+            }
+        });
+    });
+
+    //Member Post Route
+	router.post('/addmember',(req, res) => {
+		var member = new Member();
+		member.membername = req.body.membername;
+		member.email = req.body.email;
+	
+		if(req.body.membername == null || req.body.membername == '' || req.body.email == null || req.body.email == ''){
+			res.json({success: false, message:'Ensure Member Name and Website are provided'})
+		}
+		else { 
+			member.save(function(err){
+				if (err) {
+					if (err.errors != null) {
+						if (err.errors.membername) {
+						res.json({success: false, message: err.errors.membername.message});
+						} else if (err.errors.email) {
+							res.json({success: false, message: err.errors.email.message});
+						} else {
+							res.json({success: false, message: err});
+						}
+					} else if(err) {
+						console.log(err);
+						res.json({success: false, message: err.errmsg});
+					}
+
+				}
+				else {
+					console.log(err);
+					res.json({success: true, message: 'Member created!'});
+				}
+			});
+		}
+	});
+
+	router.get('/getmembers/', function(req, res) {
+		Member.find({}, function(err, members) {
+			if (err) throw err; // Throw error if cannot connect
+
+			User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+				if (err) throw err;
+				if(!mainUser) {
+					res.json({success: false, message: 'No user found'});
+				} else {
+					if (mainUser.permission === 'admin' || mainUser.permission == 'moderator') {
+						if(!members) {
+							res.json({success: false, message: 'No members found'});
+						} else {
+							res.json({success: true, members: members, permission: mainUser.permission});
+				
+						}
+					} else {
+						res.json({success: false, message: 'Insufficient Permissions'});
+					}
+				}
+			});
+		});
+	});
+
+
+	router.delete('/deletemember/:membername', function(req, res) {
+		var deletedMember = req.params.membername;
+
+		User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+			if (err) throw err;
+			if (!mainUser) {
+				res.json({success: false, message: 'No user found'});
+			} else {
+				if (mainUser.permission != 'admin') {
+					res.json({success: false, message: 'Insufficient Permissions'});
+				} else {
+					Member.findOneAndRemove({ membername: deletedMember }, function(err, user) {
+						if(err) throw err;
+						res.json({success: true});
+					});
+				}
+			}
+		});
+	});
+
+
+    // Route to get the member that needs to be edited
+    router.get('/editmember/:id', function(req, res) {
+        var editMember = req.params.id; // Assign the _id from parameters to variable
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw error if cannot connect
+            // Check if logged in user was found in database
+            if (!mainUser) {
+                res.json({ success: false, message: 'No user found' }); // Return error
+            } else {
+                // Check if logged in user has editing privileges
+                if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+                    // Find the user to be editted
+                    Member.findOne({ _id: editMember }, function(err, member) {
+                        if (err) throw err; // Throw error if cannot connect
+                        // Check if user to edit is in database
+                        if (!member) {
+                            res.json({ success: false, message: 'No member found' }); // Return error
+                        } else {
+                            res.json({ success: true, member: member }); // Return the user to be editted
+                        }
+                    });
+                } else {
+                    res.json({ success: false, message: 'Insufficient Permissions' }); // Return access error
+                }
+            }
+        });
+    });
+
+
+ 	// Route to update/edit a member
+    router.put('/editmember', function(req, res) {
+        var editMember = req.body._id;
+        if (req.body.membername) var newMemberName = req.body.membername;
+        if (req.body.email) var newWebsite = req.body.email;
+
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw err if cannot connnect
+            // Check if logged in user is found in database
+            if (!mainUser) {
+                res.json({ success: false, message: "no user found" }); // Return erro
+            } else {
+                if (newMemberName) {
+                    // Check if person making changes has appropriate access
+                    if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+						Member.findOne({ _id: editMember }, function(err, member) {
+                            if (err) throw err; // Throw error if cannot connect
+                            if (!member) {
+                                res.json({ success: false, message: 'No member found' }); // Return error
+                            } else {
+                                member.membername = newMemberName; // Assign new name to user in database
+                                // Save changes
+                                member.save(function(err) {
+                                    if (err) {
+                                        console.log(err); // Log any errors to the console
+                                    } else {
+                                        res.json({ success: true, message: 'Member Name has been updated!' }); // Return success message
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+                    }
+                }
+
+                if (newWebsite) {
+                    // Check if person making changes has appropriate access
+                    if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+                        // Look for user in database
+                        Member.findOne({ _id: editMember }, function(err, member) {
+                            if (err) throw err; // Throw error if cannot connect
+                            // Check if member is in database
+                            if (!member) {
+                                res.json({ success: false, message: 'No user found' }); // Return error
+                            } else {
+                                member.email = newWebsite;
+                                // Save changes
+                                member.save(function(err) {
+                                    if (err) {
+                                        console.log(err); // Log error to console
+                                    } else {
+                                        res.json({ success: true, message: 'Website has been updated' }); // Return success
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+                    }
+                }
+            }
+        });
+    });
 
 	return router;
 }
