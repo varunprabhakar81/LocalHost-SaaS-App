@@ -6,22 +6,24 @@
 <br>
 
 
-
-
-
-
 <form name ="invoiceForm">
     <h4>Primary Information</h4>
     <div class="bg-light">
       <!-- <div class="form-row"> -->
         <div class="form-group">
           <label for="chapter">Chapter</label>
-          <input type="text" class="form-control" id="chapter" placeholder="Select Chapter">
+          <!-- <input type="text" class="form-control" id="chapter" placeholder="Select Chapter"> -->
+            <select class="form-control" ng-model="chapter"
+                        ng-options="u.chaptername as u.chaptername for u in invoice.chapters"></select>
+
         </div>
     
         <div class="form-group">
             <label for="member">Member</label>
-            <input type="text" class="form-control" id="member" placeholder="Select Member">
+            <!-- <input type="text" class="form-control" id="member" placeholder="Select Member"> -->
+            <select class="form-control" ng-model="member"
+                        ng-options="u.membername as u.membername for u in invoice.members"></select>
+
         </div>
 
         <div class="form-row">
@@ -30,7 +32,7 @@
                 <input type="text" class="form-control" id="billingcontact">
             </div>
             <div class="form-group col-md-6">
-                <label for="billingemail">Billing Email</label>
+                <label for="billingemail">Billing Email</label>{{ member.email }}
                     <select id="billingemail" class="form-control">
                     <option selected>Choose...</option>
                     <option>...</option>
