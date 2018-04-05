@@ -1,5 +1,5 @@
 <div class  "page-header" > 
-	<h1>Manage Chapters</h1>
+	<h1>Manage GL Accounts</h1>
 </div>
 
 <br>
@@ -16,10 +16,10 @@
 					<input type="text" class="form-control" ng-model="number">&nbsp&nbsp
 				</div>
 				<div class="col">
-					<button type="submit" ng-click="chapter.showMore(number);" class="btn btn-success">Apply Filter</button>
+					<button type="submit" ng-click="glaccount.showMore(number);" class="btn btn-success">Apply Filter</button>
 				</div>
 				<div class="col">
-					<button type="button" ng-click="chapter.showAll(number);" class="btn btn-warning">Show All</button>
+					<button type="button" ng-click="glaccount.showAll(number);" class="btn btn-warning">Show All</button>
 				</div>
 			</div>
 		</form>
@@ -29,8 +29,8 @@
 <nav class="navbar navbar-light">
 	<form class="form-inline">
 		<input class="form-control mr-sm-2" type="search" placeholder="Search for..." aria-label="Search" ng-model="searchKeyword">
-		<button class="btn btn-outline-secondary my-2 my-sm-0" type="submit" ng-click="chapter.search(searchKeyword, number);">Search</button>&nbsp
-		<button class="btn btn-outline-secondary my-2 my-sm-0" type="button" ng-click="chapter.clear();">Clear</button>&nbsp
+		<button class="btn btn-outline-secondary my-2 my-sm-0" type="submit" ng-click="glaccount.search(searchKeyword, number);">Search</button>&nbsp
+		<button class="btn btn-outline-secondary my-2 my-sm-0" type="button" ng-click="glaccount.clear();">Clear</button>&nbsp
 		<!-- Advanced Search Button -->
 		<!-- <a href="/search">
 			<button type="button" class="btn btn-outline-secondary my-2 my-sm-0">Advanced Search</button>
@@ -41,47 +41,49 @@
 
 <!-- Total Search Results -->
 <div ng-show="searchFilter !== undefined">
-	<p><strong>Total results: </strong>{{ (chapter.chapters | filter: searchFilter).length }}</p>
+	<p><strong>Total results: </strong>{{ (glaccount.glaccounts | filter: searchFilter).length }}</p>
 
 </div>
 
 <!-- Results Being Shown -->
 <div ng-show="searchFilter !== undefined">
-	<p><strong>Showing: </strong>{{( chapter.chapters | filter: searchFilter | limitTo: chapter.limit).length }}</p>
+	<p><strong>Showing: </strong>{{( glaccount.glaccounts | filter: searchFilter | limitTo: glaccount.limit).length }}</p>
 </div>
 
 
 
 <!-- Custom Error Message -->
-<div class="row show-hide-message" ng-show="chapter.showMoreError">
-	<div class="alert alert-danger">{{ chapter.showMoreError }}</div>
+<div class="row show-hide-message" ng-show="glaccount.showMoreError">
+	<div class="alert alert-danger">{{ glaccount.showMoreError }}</div>
 </div>
 
 <br>
 
 <div class="panel panel-primary">
 	<p align = "right">
-		<a href="/addchapter" align="right">
-			<button type="button" ng-show="chapter.editAccess" align="right" class="btn btn-primary">Add Chapter</button>
+		<a href="/addglaccount" align="right">
+			<button type="button" ng-show="glaccount.editAccess" align="right" class="btn btn-primary">Add GL Account</button>
 		</a>
 	</p>
 
 
 	<table class="table table-striped">
 		<tr>
-			<th>Chapter Name</th>
-			<th>Website</th>
+			<th>Gl Account Number</th>
+			<th>Gl Account Name</th>
+			<th>Gl Account Type</th>
 			<th></th>	
 		</tr>
-		<tr ng-repeat="chap in chapter.chapters |orderBy: 'chaptername'|filter: searchFilter |limitTo: chapter.limit">
-			<td>{{chap.chaptername }}</td>
-			<td>{{chap.website}}</td>
+		<tr ng-repeat="gl in glaccount.glaccounts |orderBy: 'glaccountnumber' |filter: searchFilter |limitTo: glaccount.limit">
+			<td>{{gl.glaccountnumber }}</td>
+			<td>{{gl.glaccountname }}</td>
+			<td>{{gl.glaccounttype }}</td>
 			<td>
-				<a href="/editchapter/{{chap._id}}">
-					<button type="button" ng-show="chapter.editAccess" class="btn btn-primary">Edit</button>
+				<a href="/editglaccount/{{gl._id}}">
+					<button type="button" ng-show="glaccount.editAccess" class="btn btn-primary">Edit</button>
 				</a>
-				<button type="button" ng-click = "chapter.deleteChapter(chap.chaptername);" ng-show="chapter.deleteAccess" class="btn btn-danger">Delete</button>
-<!-- 				<a href="/edit/{{chapter._id}}">
+				<button type="button" ng-click = "glaccount.deleteGLAccount(gl.glaccountnumber);" ng-show="glaccount.deleteAccess" class="btn btn-danger">Delete</button>
+<!-- 				<a href="/edit/{{glaccount._id}}">
 					<button type="button" ng-show="management.editAccess" class="btn btn-primary">Edit</button>
 				</a> -->
 				<!-- <button type="button" ng-click="management.deleteUser(person.username);" ng-show="management.deleteAccess" class="btn btn-danger">Delete</button> -->
@@ -97,8 +99,8 @@
 		<div class="input-group">
 			<span class="input-group-text"> Results to display:</span>
 			<input type="text" class="form-control" ng-model="number">&nbsp&nbsp
-			<button type="button" ng-click="chapter.showMore(number);" class="btn btn-success ">Apply Filter</button>
-			<button type="button" ng-click="chapter.showAll(number);" class="btn btn-warning">Show All</button>
+			<button type="button" ng-click="glaccount.showMore(number);" class="btn btn-success ">Apply Filter</button>
+			<button type="button" ng-click="glaccount.showAll(number);" class="btn btn-warning">Show All</button>
 		</div>
 	</div>
 </div>
@@ -106,7 +108,7 @@
 
 
     <!-- BootstrapJS Modal -->
-    <div class="modal fade" id="chapModal" role="dialog">
+    <div class="modal fade" id="glModal" role="dialog">
       <div class="modal-dialog">
 
         <!-- Modal content-->
@@ -114,11 +116,11 @@
           <div class="modal-header">
 <!--             <button ng-hide="main.hideButton" type="button" ng-click="main.endSession();" class="close" data-dismiss="modal">&times;</button> -->
             <!-- Modal Header -->
-            <h4 class="modal-title">Edit Chapter</h4>
+            <h4 class="modal-title">Edit GL Account</h4>
           </div>
           <!-- Modal Body -->
           <div class="modal-body">
-            <p>Edit Chapter Details</p>
+            <p>Edit GL Account Details</p>
           </div>
           <div class="modal-footer">
             <!-- Modal 'Yes' & 'No' Buttons -->
@@ -133,16 +135,16 @@
 
 
 
-<!-- $scope.showChapterModal = function() {
-  $scope.showChapterEditModal = true;
+<!-- $scope.showGLAccountModal = function() {
+  $scope.showGLAccountEditModal = true;
 };
 
-$scope.updateChapter = function() {
-	//edit chapter
-  $scope.showChapterEditModal = false;
+$scope.updateGLAccount = function() {
+	//edit glaccount
+  $scope.showGLAccountEditModal = false;
 };
 
-$scope.cancelChapterUpdate = function() {
-  $scope.showChapterEditModal = false;
+$scope.cancelGLAccountUpdate = function() {
+  $scope.showGLAccountEditModal = false;
 }; -->
 

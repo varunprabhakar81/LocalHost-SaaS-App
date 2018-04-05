@@ -1,0 +1,74 @@
+<div class  "page-header" > 
+
+<h1>Create GL Account</h1>
+
+</div>
+
+<form name ="glaccountAddForm" ng-submit ="glaccount.addGLAccount(glaccountData, glaccountAddForm.$valid)" novalidate>
+	<div class="form-group" ng-class="{'has-error': (!glaccountAddForm.glaccountnumber.$valid && !glaccountAddForm.glaccountnumber.$pristine) || (!glaccountAddForm.glaccountnumber.$valid && glaccountAddForm.$submitted) , 'has-success': glaccountAddForm.glaccountnumber.$valid && !glaccountAddForm.glaccountnumber.$pristine}">
+
+		
+		<label>GL Account Number:</label>
+		<input class="form-control" type="text" name="glaccountnumber" placeholder="please enter gl account number" ng-model="glaccount.glaccountData.glaccountnumber" ng-pattern="/^[0-9]+$/" required>
+		<p class="help-block" ng-show="(!glaccountAddForm.glaccountnumber.$pristine && glaccountAddForm.glaccountnumber.$error.required) || (glaccountAddForm.$submitted && glaccountAddForm.glaccountnumber.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!glaccountAddForm.glaccountnumber.$pristine && glaccountAddForm.glaccountnumber.$error.pattern)" class="help-block">
+			<li> Must not contain any characters or spaces</li>
+		</ul>
+
+	</div>
+
+	<div class="form-group" ng-class="{'has-error': (!glaccountAddForm.glaccountname.$valid && !glaccountAddForm.glaccountname.$pristine) || (!glaccountAddForm.glaccountname.$valid && glaccountAddForm.$submitted) , 'has-success': glaccountAddForm.glaccountname.$valid && !glaccountAddForm.glaccountname.$pristine}">
+
+		
+		<label>GL Account Name:</label>
+		<input class="form-control" type="text" name="glaccountname" placeholder="please enter gl account name" ng-model="glaccount.glaccountData.glaccountname" ng-pattern="/^[a-zA-Z\d\-_\s]+$/" required>
+		<p class="help-block" ng-show="(!glaccountAddForm.glaccountname.$pristine && glaccountAddForm.glaccountname.$error.required) || (glaccountAddForm.$submitted && glaccountAddForm.glaccountname.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!glaccountAddForm.glaccountname.$pristine && glaccountAddForm.glaccountname.$error.pattern)" class="help-block">
+			<li> Must not contain any special characters</li>
+		</ul>
+
+	</div>
+
+	<div class="form-group" ng-class="{'has-error': (!glaccountAddForm.glaccounttype.$valid && !glaccountAddForm.glaccounttype.$pristine) || (!glaccountAddForm.glaccounttype.$valid && glaccountAddForm.$submitted) , 'has-success': glaccountAddForm.glaccounttype.$valid && !glaccountAddForm.glaccounttype.$pristine}">
+
+		
+		<label>GL Account Type:</label>
+<!-- 		<input class="form-control" type="text" name="glaccounttype" placeholder="please enter glaccount type" ng-model="glaccount.glaccountData.glaccounttype" ng-pattern="/^[a-zA-Z\d\-_\s]+$/" required> -->
+
+		 <select ng-model="glaccount.glaccountData.glaccounttype" name="glaccounttype" ng-options="GLType.name as GLType.name for GLType in GLTypes"></select>
+
+		<p class="help-block" ng-show="(!glaccountAddForm.glaccounttype.$pristine && glaccountAddForm.glaccounttype.$error.required) || (glaccountAddForm.$submitted && glaccountAddForm.glaccounttype.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!glaccountAddForm.glaccounttype.$pristine && glaccountAddForm.glaccounttype.$error.pattern)" class="help-block">
+			<li> Must not contain any special characters</li>
+		</ul>
+
+	</div>
+
+	<br>
+	
+	<button ng-disabled="register.disabled" class="btn btn-primary" type="submit">Create GL Account</button>
+</form>
+
+
+<br>
+
+
+<div class = "jumbotron text-center" ng-show="glaccount.loading">
+	<span class = "glymphicon glymphicon-repeat spinner"></span>
+	<p>Loading...</p>
+
+</div>
+<br>
+
+<div class="row show-hide-message" ng-show="glaccount.successMsg">
+	<div class="alert alert-success">{{glaccount.successMsg}}</div>
+</div>
+	
+	<br>
+
+<div class="row show-hide-message" ng-show="glaccount.errorMsg">
+	<div class="alert alert-danger">{{glaccount.errorMsg}}</div>
+</div>

@@ -10,6 +10,7 @@ var appRoutes = require('./app/routes/api')(router);
 var path = require('path');
 var passport = require('passport');
 var social = require('./app/passport/passport')(app, passport);
+var globalconfig = require('./config/config.global');
 
 //Middleware
 app.use(morgan('dev'));//Express logging module

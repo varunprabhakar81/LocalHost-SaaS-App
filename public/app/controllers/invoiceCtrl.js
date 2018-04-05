@@ -1,8 +1,10 @@
-angular.module('invoiceController', ['memberController', 'chapterController'])
+angular.module('invoiceController', ['memberController', 'chapterController', 'configServices'])
 
-.controller('invoiceCtrl', function(Member, Chapter) {
+.controller('invoiceCtrl', function(Member, Chapter, $scope, Config) {
 	var app = this;
-
+	$scope.billingemail = undefined;
+	$scope.invoicedate = new Date();
+    app.invoiceTerms = Config.invoiceTerms;
 
     // Function: get all the chapters from database
     function getChapters() {
@@ -33,7 +35,7 @@ angular.module('invoiceController', ['memberController', 'chapterController'])
             }
         });
     }
-    
+
     // Function: get all the members from database
     function getMembers() {
         // Runs function to get all the members from database
@@ -70,6 +72,20 @@ angular.module('invoiceController', ['memberController', 'chapterController'])
     getChapters(); // Invoke function to get chapters from databases
     getMembers();
 
-	// console.log(app.members);
+    app.copyBillingEmail = function() {
+    	$scope.billingemail = angular.copy($scope.member.email);
+    };
+
+    app.calcInvoiceDueDate = function() {
+        $scope.invoiceduedate = new Date();
+        var invoicedate = angular.copy($scope.invoicedate);
+        var termdays = angular.copy($scope.invoiceterms.days);
+        
+        var duedate = new Date();
+        duedate.setDate(invoicedate.getDate() + termdays);
+
+        $scope.invoiceduedate = duedate;
+
+    };
 
 })

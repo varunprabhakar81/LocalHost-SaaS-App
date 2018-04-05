@@ -21,23 +21,14 @@
         <div class="form-group">
             <label for="member">Member</label>
             <!-- <input type="text" class="form-control" id="member" placeholder="Select Member"> -->
-            <select class="form-control" ng-model="member"
-                        ng-options="u.membername as u.membername for u in invoice.members"></select>
+            <select class="form-control" ng-model="member" ng-change="invoice.copyBillingEmail();" ng-options="u.membername for u in invoice.members"></select>
 
         </div>
 
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="billingcontact">Billing Contact</label>
-                <input type="text" class="form-control" id="billingcontact">
-            </div>
-            <div class="form-group col-md-6">
-                <label for="billingemail">Billing Email</label>{{ member.email }}
-                    <select id="billingemail" class="form-control">
-                    <option selected>Choose...</option>
-                    <option>...</option>
-                    </select>
-            </div>
+        <div class="form-group">
+            <label for="member">Billing Email</label>
+            <!-- <input type="text" class="form-control" id="member" placeholder="Select Member"> -->
+            <input class="form-control" ng-model="billingemail" ng-disabled="!member">
 
         </div>
     </div>
@@ -48,15 +39,16 @@
         <div class="form-row">
             <div class="form-group col-md-4">
                 <label for="invoicedate">Invoice Date</label>
-                <input type="date" class="form-control" id="invoicedate" placeholder="Invoice Date">
+                <input type="date" class="form-control" ng-change="invoice.calcInvoiceDueDate();" ng-model="invoicedate">
             </div>
             <div class="form-group col-md-4">
-                <label for="terms">Terms</label>
-                <input type="text" class="form-control" id="terms" placeholder="Terms">
+                <label for="terms">Invoice Terms</label>
+                <!-- <input type="text" class="form-control" id="terms" placeholder="Terms"> -->
+                <select class="form-control" ng-model="invoiceterms" ng-change="invoice.calcInvoiceDueDate();" ng-options="terms.name for terms in invoice.invoiceTerms"></select>
             </div>
             <div class="form-group col-md-4">
-                <label for="invoicedate">Invoice Due Date</label>
-                <input type="date" class="form-control" id="invoiceduedate" placeholder="Invoice Due Date">
+                <label for="invoiceduedate">Invoice Due Date</label>
+                <input type="date" class="form-control" id="invoiceduedate" ng-model="invoiceduedate" placeholder="Invoice Due Date" ng-disabled="(!invoiceterms || !invoicedate)">
             </div>
         </div>
         <div class="form-row">
@@ -66,7 +58,7 @@
             </div>
             <div class="form-group col-md-6">
                 <label for="araccount">Accounts Receivable Account</label>
-                <input type="text" class="form-control" id="araccount" placeholder="Accounts Reveivable Account">
+                <input type="text" class="form-control" id="araccount" placeholder="Accounts Receivable Account">
             </div>
         </div>
     </div>

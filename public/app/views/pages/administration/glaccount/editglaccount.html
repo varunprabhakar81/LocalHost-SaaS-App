@@ -1,0 +1,75 @@
+<div class  "page-header" > 
+    <h1>Edit GL Account</h1>
+</div>
+
+<br>
+
+<nav>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <a class="nav-item nav-link numberTab" ng-click="editGLAccount.glaccountnumberPhase();" ng-class="glaccountnumberTab" data-toggle="tab" href="#" role="presentation" aria-controls="glaccountnumberTab">GL Account Number</a>
+    <a class="nav-item nav-link nameTab" ng-click="editGLAccount.glaccountnamePhase();" ng-class="glaccountnameTab" data-toggle="tab" href="#" role="presentation" aria-controls="glaccountnameTab">GL Account Name</a>
+    <a class="nav-item nav-link typeTab" ng-click="editGLAccount.glaccounttypePhase();" ng-class="glaccounttypeTab" data-toggle="tab" href="#" role="presentation" aria-controls="glaccounttypeTab">GL Account Type</a>
+  </div>
+</nav>
+
+
+<form name="editGLAccount.glaccountnumberForm" ng-show="editGLAccount.phase1" ng-submit="editGLAccount.updateGLAccountNumber(newGLAccountNumber, editGLAccount.glaccountnumberForm.glaccountnumber.$valid)" novalidate>
+    <div ng-class="{ 'has-success':(editGLAccount.glaccountnumberForm.glaccountnumber.$valid && !editGLAccount.glaccountnumberForm.glaccountnumber.$pristine), 'has-error':(!editGLAccount.glaccountnumberForm.glaccountnumber.$valid && !editGLAccount.glaccountnumberForm.glaccountnumber.$pristine) || (!glaccountnumberForm.glaccountnumber.$valid && glaccountnumberForm.$submitted) }">
+        <label>GL Account Number:</label>
+        <input ng-disabled="editGLAccount.disabled" class="form-control" type="text" name="glaccountnumber" placeholder="please enter glaccount number" ng-model="newGLAccountNumber" ng-pattern="/^[0-9]+$/" required>
+        <p class="help-block" ng-show="(!editGLAccount.glaccountnumberForm.glaccountnumber.$pristine && glaccountnumberForm.glaccountnumber.$error.required) || (editGLAccount.glaccountnumberForm.$submitted && editGLAccount.glaccountnumberForm.glaccountnumber.$error.required)">This field is required</p>
+        <ul ng-show="(!editGLAccount.glaccountnumberForm.glaccountnumber.$pristine && editGLAccount.glaccountnumberForm.glaccountnumber.$error.pattern)" class="help-block">
+            <li> Must not contain any characters or spaces</li>
+        </ul>
+    </div>
+    <br>
+    <!-- Submit Button -->
+    <button ng-disabled="editGLAccount.disabled" class="btn btn-primary" type="submit">Update</button>
+</form>
+
+<form name="editGLAccount.glaccountnameForm" ng-show="editGLAccount.phase2" ng-submit="editGLAccount.updateGLAccountName(newGLAccountName, editGLAccount.glaccountnameForm.glaccountname.$valid)" novalidate>
+    <div ng-class="{ 'has-success':(editGLAccount.glaccountnameForm.glaccountname.$valid && !editGLAccount.glaccountnameForm.glaccountname.$pristine), 'has-error':(!editGLAccount.glaccountnameForm.glaccountname.$valid && !editGLAccount.glaccountnameForm.glaccountname.$pristine) || (!glaccountnameForm.glaccountname.$valid && glaccountnameForm.$submitted) }">
+        <label>GL Account Name:</label>
+        <input ng-disabled="editGLAccount.disabled" class="form-control" type="text" name="glaccountname" placeholder="please enter glaccount name" ng-model="newGLAccountName" ng-pattern="/^[a-zA-Z\d\-_\s]+$/" required>
+        <p class="help-block" ng-show="(!editGLAccount.glaccountnameForm.glaccountname.$pristine && glaccountnameForm.glaccountname.$error.required) || (editGLAccount.glaccountnameForm.$submitted && editGLAccount.glaccountnameForm.glaccountname.$error.required)">This field is required</p>
+        <ul ng-show="(!editGLAccount.glaccountnameForm.glaccountname.$pristine && editGLAccount.glaccountnameForm.glaccountname.$error.pattern)" class="help-block">
+            <li> Must not contain any special characters</li>
+        </ul>
+    </div>
+    <br>
+    <!-- Submit Button -->
+    <button ng-disabled="editGLAccount.disabled" class="btn btn-primary" type="submit">Update</button>
+</form>
+
+
+<form name="editGLAccount.glaccounttypeForm" ng-show="editGLAccount.phase3" ng-submit="editGLAccount.updateGLAccountType(newGLAccountType, editGLAccount.glaccounttypeForm.glaccounttype.$valid)" novalidate>
+    <div ng-class="{ 'has-success':(editGLAccount.glaccounttypeForm.glaccounttype.$valid && !editGLAccount.glaccounttypeForm.glaccounttype.$pristine), 'has-error':(!editGLAccount.glaccounttypeForm.glaccounttype.$valid && !editGLAccount.glaccounttypeForm.glaccounttype.$pristine) || (!glaccounttypeForm.glaccounttype.$valid && glaccounttypeForm.$submitted) }">
+        <label>GL Account Type:</label><br>
+        <select ng-model="newGLAccountType" name="glaccounttype" ng-options="GLType.name as GLType.name for GLType in GLTypes"></select>
+
+        <p class="help-block" ng-show="(!editGLAccount.glaccounttypeForm.glaccounttype.$pristine && glaccounttypeForm.glaccounttype.$error.required) || (editGLAccount.glaccounttypeForm.$submitted && editGLAccount.glaccounttypeForm.glaccounttype.$error.required)">This field is required</p>
+        <ul ng-show="(!editGLAccount.glaccounttypeForm.glaccounttype.$pristine && editGLAccount.glaccounttypeForm.glaccounttype.$error.pattern)" class="help-block">
+            <li> Must not contain any special characters</li>
+        </ul>
+    </div>
+    <br>
+    <!-- Submit Button -->
+    <button ng-disabled="editGLAccount.disabled" class="btn btn-primary" type="submit">Update</button>
+</form>
+
+
+<br>
+
+<!-- Custom Success Message -->
+<div class="row show-hide-message" ng-show="editGLAccount.successMsg">
+    <div class="alert alert-success">{{ editGLAccount.successMsg }}</div>
+</div>
+<!-- Custom Success Message -->
+
+<br>
+
+<!-- Custom Error Message -->
+<div class="row show-hide-message" ng-show="editGLAccount.errorMsg">
+    <div class="alert alert-danger">{{ editGLAccount.errorMsg }}</div>
+</div>
+<!-- Custom Error Message -->

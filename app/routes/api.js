@@ -1,6 +1,7 @@
 var User = require('../models/user');
 var Chapter = require('../models/chapter')
 var Member = require('../models/member')
+var GLAccount = require('../models/glaccount')
 // var Invoice = require('../models/invoice');
 // var InvoiceLines = require('../models/invoice-lines');
 var jwt = require('jsonwebtoken');
@@ -64,8 +65,6 @@ module.exports = function(router) {
 
 				} 
 				else {
-
-
 					var email = {
 					  from: 'DigitalCloud ERP Support, support@digitalclouderp.com',
 					  to: user.email,
@@ -702,6 +701,7 @@ module.exports = function(router) {
 	//Chapter Post Route
 	router.post('/addchapter',(req, res) => {
 		var chapter = new Chapter();
+				console.log('account add');
 		chapter.chaptername = req.body.chaptername;
 		chapter.website = req.body.website;
 	
@@ -986,7 +986,7 @@ module.exports = function(router) {
     router.put('/editmember', function(req, res) {
         var editMember = req.body._id;
         if (req.body.membername) var newMemberName = req.body.membername;
-        if (req.body.email) var newWebsite = req.body.email;
+        if (req.body.email) var newEmail = req.body.email;
 
         User.findOne({ username: req.decoded.username }, function(err, mainUser) {
             if (err) throw err; // Throw err if cannot connnect
@@ -1018,7 +1018,7 @@ module.exports = function(router) {
                     }
                 }
 
-                if (newWebsite) {
+                if (newEmail) {
                     // Check if person making changes has appropriate access
                     if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
                         // Look for user in database
@@ -1028,13 +1028,216 @@ module.exports = function(router) {
                             if (!member) {
                                 res.json({ success: false, message: 'No user found' }); // Return error
                             } else {
-                                member.email = newWebsite;
+                                member.email = newEmail;
                                 // Save changes
                                 member.save(function(err) {
                                     if (err) {
                                         console.log(err); // Log error to console
                                     } else {
-                                        res.json({ success: true, message: 'Website has been updated' }); // Return success
+                                        res.json({ success: true, message: 'Email has been updated' }); // Return success
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+                    }
+                }
+            }
+        });
+    });
+    
+
+    //Account Post Route
+	router.post('/addglaccount',(req, res) => {
+		var glaccount = new GLAccount();
+		glaccount.glaccountnumber = req.body.glaccountnumber;
+		glaccount.glaccountname = req.body.glaccountname;
+		glaccount.glaccounttype = req.body.glaccounttype;
+	
+		if(req.body.glaccountnumber == null || req.body.glaccountnumber == '' || req.body.glaccountname == null || req.body.glaccountname == '' || req.body.glaccounttype == null || req.body.glaccounttype == ''){
+			res.json({success: false, message:'Ensure all GL Account mandatory fields are provided'})
+		}
+		else { 
+			glaccount.save(function(err){
+				if (err) {
+					if (err.errors != null) {
+						if (err.errors.glaccountnumber) {
+						res.json({success: false, message: err.errors.glaccountnumber.message});
+						} else if (err.errors.glaccountname) {
+						res.json({success: false, message: err.errors.glaccountname.message});
+						} else if (err.errors.glaccounttype) {
+							res.json({success: false, message: err.errors.glaccounttype.message});
+						} else {
+							res.json({success: false, message: err});
+						}
+					} else if(err) {
+						console.log(err);
+						res.json({success: false, message: err.errmsg});
+					}
+
+				}
+				else {
+					console.log(err);
+					res.json({success: true, message: 'GL Account created!'});
+				}
+			});
+		}
+	});
+
+	router.get('/getglaccounts/', function(req, res) {
+		GLAccount.find({}, function(err, glaccounts) {
+			if (err) throw err; // Throw error if cannot connect
+
+			User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+				if (err) throw err;
+				if(!mainUser) {
+					res.json({success: false, message: 'No user found'});
+				} else {
+					if (mainUser.permission === 'admin' || mainUser.permission == 'moderator') {
+						if(!glaccounts) {
+							res.json({success: false, message: 'No GL Accounts found'});
+						} else {
+							res.json({success: true, glaccounts: glaccounts, permission: mainUser.permission});
+				
+						}
+					} else {
+						res.json({success: false, message: 'Insufficient Permissions'});
+					}
+				}
+			});
+		});
+	});
+
+
+	router.delete('/deleteglaccount/:glaccountnumber', function(req, res) {
+		var deletedGLAccount = req.params.glaccountnumber;
+
+		User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+			if (err) throw err;
+			if (!mainUser) {
+				res.json({success: false, message: 'No user found'});
+			} else {
+				if (mainUser.permission != 'admin') {
+					res.json({success: false, message: 'Insufficient Permissions'});
+				} else {
+					GLAccount.findOneAndRemove({ glaccountnumber: deletedGLAccount }, function(err, user) {
+						if(err) throw err;
+						res.json({success: true});
+					});
+				}
+			}
+		});
+	});
+
+
+    // Route to get the glaccount that needs to be edited
+    router.get('/editglaccount/:id', function(req, res) {
+        var editGLAccount = req.params.id; // Assign the _id from parameters to variable
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw error if cannot connect
+            // Check if logged in user was found in database
+            if (!mainUser) {
+                res.json({ success: false, message: 'No user found' }); // Return error
+            } else {
+                // Check if logged in user has editing privileges
+                if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+                    // Find the user to be editted
+                    GLAccount.findOne({ _id: editGLAccount }, function(err, glaccount) {
+                        if (err) throw err; // Throw error if cannot connect
+                        // Check if user to edit is in database
+                        if (!glaccount) {
+                            res.json({ success: false, message: 'No GL Account found' }); // Return error
+                        } else {
+                            res.json({ success: true, glaccount: glaccount }); // Return the user to be editted
+                        }
+                    });
+                } else {
+                    res.json({ success: false, message: 'Insufficient Permissions' }); // Return access error
+                }
+            }
+        });
+    });
+
+
+ 	// Route to update/edit a glaccount
+    router.put('/editglaccount', function(req, res) {
+        var editGLAccount = req.body._id;
+        if (req.body.glaccountnumber) var newGLAccountNumber = req.body.glaccountnumber;
+        if (req.body.glaccountname) var newGLAccountName = req.body.glaccountname;
+        if (req.body.glaccounttype) var newGLAccountType = req.body.glaccounttype;
+
+
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw err if cannot connnect
+            // Check if logged in user is found in database
+            if (!mainUser) {
+                res.json({ success: false, message: "no user found" }); // Return erro
+            } else {
+                if (newGLAccountNumber) {
+                    // Check if person making changes has appropriate access
+                    if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+						GLAccount.findOne({ _id: editGLAccount }, function(err, glaccount) {
+                            if (err) throw err; // Throw error if cannot connect
+                            if (!glaccount) {
+                                res.json({ success: false, message: 'No GL Account found' }); // Return error
+                            } else {
+                                glaccount.glaccountnumber = newGLAccountNumber; // Assign new name to user in database
+                                // Save changes
+                                glaccount.save(function(err) {
+                                    if (err) {
+                                        console.log(err); // Log any errors to the console
+                                    } else {
+                                        res.json({ success: true, message: 'GL Account Number has been updated!' }); // Return success message
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+                    }
+                }
+                if (newGLAccountName) {
+                    // Check if person making changes has appropriate access
+                    if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+						GLAccount.findOne({ _id: editGLAccount }, function(err, glaccount) {
+                            if (err) throw err; // Throw error if cannot connect
+                            if (!glaccount) {
+                                res.json({ success: false, message: 'No GL Account found' }); // Return error
+                            } else {
+                                glaccount.glaccountname = newGLAccountName; // Assign new name to user in database
+                                // Save changes
+                                glaccount.save(function(err) {
+                                    if (err) {
+                                        console.log(err); // Log any errors to the console
+                                    } else {
+                                        res.json({ success: true, message: 'GL Account Name has been updated!' }); // Return success message
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+                    }
+                }
+
+                if (newGLAccountType) {
+                    // Check if person making changes has appropriate access
+                    if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+                        // Look for user in database
+                        GLAccount.findOne({ _id: editGLAccount }, function(err, glaccount) {
+                            if (err) throw err; // Throw error if cannot connect
+                            // Check if glaccount is in database
+                            if (!glaccount) {
+                                res.json({ success: false, message: 'No GL Account found' }); // Return error
+                            } else {
+                                glaccount.glaccounttype = newGLAccountType;
+                                // Save changes
+                                glaccount.save(function(err) {
+                                    if (err) {
+                                        console.log(err); // Log error to console
+                                    } else {
+                                        res.json({ success: true, message: 'GL Account Type has been updated' }); // Return success
                                     }
                                 });
                             }

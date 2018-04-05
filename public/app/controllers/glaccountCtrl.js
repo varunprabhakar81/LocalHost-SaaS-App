@@ -1,6 +1,6 @@
-angular.module('chapterController', ['chapterServices'])
+angular.module('glaccountController', ['glaccountServices'])
 
-.controller('chapterCtrl', function($http, $location, $timeout, $scope, Chapter) {
+.controller('glaccountCtrl', function($http, $location, $timeout, $scope, GLAccount, Config) {
 
     var app = this;
 
@@ -11,17 +11,19 @@ angular.module('chapterController', ['chapterServices'])
     app.deleteAccess = false; // CLear access on load
     app.limit = 20; // Set a default limit to ng-repeat
     app.searchLimit = undefined; // Set the default search page results limit to zero
-    app.showChapterEditModal = false;
+    app.showGLAccountEditModal = false;
     app.choiceMade = false;
+
+    $scope.GLTypes = Config.GLAccountTypes;
     
-    this.addChapter = function(chapterData, valid) {
+    this.addGLAccount = function(glaccountData, valid) {
         app.disabled = true;
         app.errorMsg = false;
         app.successMsg = false;
         app.loading = true;
 
         if (valid) {
-            Chapter.addChapter(app.chapterData).then(function(data) {
+            GLAccount.addGLAccount(app.glaccountData).then(function(data) {
 
             if(data.data.success){
                 app.loading = false;
@@ -29,7 +31,7 @@ angular.module('chapterController', ['chapterServices'])
                 app.successMsg = data.data.message+'...Redirecting';
                 //Redirect to Home Message
                 $timeout(function(){
-                    $location.path('/managechapters');
+                    $location.path('/manageglaccounts');
                 },2000);
                 
             }else {
@@ -48,15 +50,15 @@ angular.module('chapterController', ['chapterServices'])
 
     };
 
-    // Function: get all the chapters from database
-    function getChapters() {
-        // Runs function to get all the chapters from database
-        Chapter.getChapters().then(function(data) {
+    // Function: get all the glaccounts from database
+    function getGLAccounts() {
+        // Runs function to get all the glaccounts from database
+        GLAccount.getGLAccounts().then(function(data) {
             // Check if able to get data from database
             if (data.data.success) {
                 // Check which permissions the logged in user has
                 if (data.data.permission === 'admin' || data.data.permission === 'moderator') {
-                    app.chapters = data.data.chapters; // Assign chapters from database to variable
+                    app.glaccounts = data.data.glaccounts; // Assign glaccounts from database to variable
                     app.loading = false; // Stop loading icon
                     app.accessDenied = false; // Show table
 
@@ -79,14 +81,14 @@ angular.module('chapterController', ['chapterServices'])
     }
 
 
-    getChapters(); // Invoke function to get chapters from databases
+    getGLAccounts(); // Invoke function to get glaccounts from databases
 
-    app.chapterEditModal = function() {
-        $("#chapModal").modal({ backdrop: "static" }); // Open modal
+    app.glaccountEditModal = function() {
+        $("#glModal").modal({ backdrop: "static" }); // Open modal
         // Give user 10 seconds to make a decision 'yes'/'no'
         $timeout(function() {
                 if (!app.choiceMade) {
-                    $("#chapModal").modal('hide');// If no choice is made after 10 seconds, select 'no' for them
+                    $("#glModal").modal('hide');// If no choice is made after 10 seconds, select 'no' for them
                 }
             }, 2500);
     };
@@ -97,8 +99,6 @@ angular.module('chapterController', ['chapterServices'])
     app.showMore = function(number) {
         app.showMoreError = false; // Clear error message
         // Run function only if a valid number above zero
-        console.log(number);
-
         if (number > 0) {
             app.limit = number; // Change ng-repeat filter to number requested by user
         } else if (number == '') {
@@ -114,13 +114,13 @@ angular.module('chapterController', ['chapterServices'])
         app.showMoreError = false; // Clear error message
     };
 
-    // Function: Delete a chapter
-    app.deleteChapter = function(chaptername) {
+    // Function: Delete a glaccount
+    app.deleteGLAccount = function(glaccountname) {
         // Run function to delete a user
-        Chapter.deleteChapter(chaptername).then(function(data) {
+        GLAccount.deleteGLAccount(glaccountname).then(function(data) {
             // Check if able to delete user
             if (data.data.success) {
-                getChapters(); // Reset users on page
+                getGLAccounts(); // Reset users on page
             } else {
                 app.showMoreError = data.data.message; // Set error message
             }
@@ -187,63 +187,78 @@ angular.module('chapterController', ['chapterServices'])
 })
 
 // Controller: Used to edit users
-.controller('editChapterCtrl', function($scope, $routeParams, User, Chapter, $timeout, $location) {
+.controller('editGLAccountCtrl', function($scope, $routeParams, User, GLAccount, Config, $timeout, $location) {
 
     var app = this;
-    $scope.chapternameTab = 'active'; // Set the 'chaptername' tab to the default active tab
-    app.phase1 = true; // Set the 'chaptername' tab to default view
+    $scope.glaccountnumberTab = 'active'; // Set the 'glaccountname' tab to the default active tab
+    app.phase1 = true;
+    $scope.GLTypes = Config.GLAccountTypes;
 
-    // Function: get the chapter that needs to be edited
-    Chapter.getChapter($routeParams.id).then(function(data) {
+    // Function: get the glaccount that needs to be edited
+    GLAccount.getGLAccount($routeParams.id).then(function(data) {
         // Check if the user's _id was found in database
         if (data.data.success) {
-            $scope.newChapterName = data.data.chapter.chaptername; // Display chapter name in scope
-            $scope.newWebsite = data.data.chapter.website; // Display chapter website in scope
-            app.currentChapter = data.data.chapter._id; // Get user's _id for update functions
+            $scope.newGLAccountName = data.data.glaccount.glaccountname;
+            $scope.newGLAccountNumber = data.data.glaccount.glaccountnumber;
+            $scope.newGLAccountType = data.data.glaccount.glaccounttype;
+
+            app.currentGLAccount = data.data.glaccount._id; // Get user's _id for update functions
         } else {
             app.errorMsg = data.data.message; // Set error message
         }
     });
 
-    // Function: Set the chaptername pill to active
-    app.chapternamePhase = function() {
-        $scope.chapternameTab = 'active'; // Set chapter name list to active
-        $scope.websiteTab = 'default'; // Clear website tab
-        app.phase1 = true; // Set chaptername tab active
-        app.phase2 = false; // Set website tab inactive
+    app.glaccountnumberPhase = function() {
+        $scope.glaccountnumberTab = 'active';
+        $scope.glaccountnameTab = 'default';
+        $scope.glaccounttypeTab = 'default';
+        app.phase1 = true;
+        app.phase2 = false;
+        app.phase3 = false;
         app.errorMsg = false; // Clear error message
     };
 
-    // Function: Set the e-mail pill to active
-    app.websitePhase = function() {
-        $scope.chapternameTab = 'default'; // Clear chapter name list to active
-        $scope.websiteTab = 'active'; // Set website tab
-        app.phase1 = false; // Set chaptername tab inactive
-        app.phase2 = true; // Set website tab active
+    app.glaccountnamePhase = function() {
+        $scope.glaccountnumberTab = 'default';
+        $scope.glaccountnameTab = 'active';
+        $scope.glaccounttypeTab = 'default';
+        app.phase1 = false;
+        app.phase2 = true;
+        app.phase3 = false;
         app.errorMsg = false; // Clear error message
     };
 
-    // Function: Update the chapter's name
-    app.updateChapterName = function(newChapterName, valid) {
+    app.glaccounttypePhase = function() {
+        $scope.glaccountnumberTab = 'default';
+        $scope.glaccountnameTab = 'default';
+        $scope.glaccounttypeTab = 'active';
+        app.phase1 = false;
+        app.phase2 = false;
+        app.phase3 = true;
+        app.errorMsg = false; // Clear error message
+    };
+
+    app.updateGLAccountNumber = function(newGLAccountNumber, valid) {
         app.errorMsg = false; // Clear any error messages
         app.disabled = true; // Disable form while processing
-        // Check if the chaptername being submitted is valid
+
+
         if (valid) {
-            var chapterObject = {}; // Create a user object to pass to function
-            chapterObject._id = app.currentChapter; // Get _id to search database
-            chapterObject.chaptername = $scope.newChapterName; // Set the new name to the user
-            // Runs function to update the user's name
-            Chapter.editChapter(chapterObject).then(function(data) {
-                // Check if able to edit the user's name
+            var glaccountObject = {}; // Create a user object to pass to function
+            glaccountObject._id = app.currentGLAccount; // Get _id to search database
+            glaccountObject.glaccountnumber = $scope.newGLAccountNumber;
+
+            GLAccount.editGLAccount(glaccountObject).then(function(data) {
+
                 if (data.data.success) {
                     app.successMsg = data.data.message; // Set success message
                     // Function: After two seconds, clear and re-enable
                     $timeout(function() {
-                        app.chapternameForm.name.$setPristine();
-                        app.chapternameForm.name.$setUntouched();
+                        app.glaccountnumberForm.glaccountnumber.$setPristine();
+                        app.glaccountnumberForm.glaccountnumber.$setUntouched();
                         app.successMsg = false; // Clear success message
                         app.disabled = false; // Enable form for editing
-                        $location.path('/managechapters');
+                        $location.path('/manageglaccounts');
                     }, 2000);
                 } else {
                     app.errorMsg = data.data.message; // Clear any error messages
@@ -256,27 +271,58 @@ angular.module('chapterController', ['chapterServices'])
         }
     };
 
-    // Function: Update the chapter's website
-    app.updateWebsite = function(newWebsite, valid) {
+    app.updateGLAccountName = function(newGLAccountName, valid) {
         app.errorMsg = false; // Clear any error messages
         app.disabled = true; // Disable form while processing
-        // Check if the chaptername being submitted is valid
         if (valid) {
-            var chapterObject = {}; // Create a user object to pass to function
-            chapterObject._id = app.currentChapter; // Get _id to search database
-            chapterObject.website = $scope.newWebsite; // Set the new name to the user
-            // Runs function to update the user's name
-            Chapter.editChapter(chapterObject).then(function(data) {
-                // Check if able to edit the user's name
+            var glaccountObject = {}; // Create a user object to pass to function
+            glaccountObject._id = app.currentGLAccount; // Get _id to search database
+            glaccountObject.glaccountname = $scope.newGLAccountName;
+            GLAccount.editGLAccount(glaccountObject).then(function(data) {
+
                 if (data.data.success) {
                     app.successMsg = data.data.message; // Set success message
                     // Function: After two seconds, clear and re-enable
                     $timeout(function() {
-                        app.websiteForm.website.$setPristine();
-                        app.websiteForm.website.$setUntouched();
+                        app.glaccountnameForm.glaccountname.$setPristine();
+                        app.glaccountnameForm.glaccountname.$setUntouched();
                         app.successMsg = false; // Clear success message
                         app.disabled = false; // Enable form for editing
-                        $location.path('/managechapters');
+                        $location.path('/manageglaccounts');
+                    }, 2000);
+                } else {
+                    app.errorMsg = data.data.message; // Clear any error messages
+                    app.disabled = false; // Enable form for editing
+                }
+            });
+        } else {
+            app.errorMsg = 'Please ensure form is filled out properly'; // Set error message
+            app.disabled = false; // Enable form for editing
+        }
+    };
+
+    app.updateGLAccountType = function(newGLAccountType, valid) {
+        app.errorMsg = false; // Clear any error messages
+        app.disabled = true; // Disable form while processing
+
+        console.log(newGLAccountType);
+
+        if (valid) {
+            var glaccountObject = {}; // Create a user object to pass to function
+            glaccountObject._id = app.currentGLAccount; // Get _id to search database
+            glaccountObject.glaccounttype = $scope.newGLAccountType;
+
+            GLAccount.editGLAccount(glaccountObject).then(function(data) {
+
+                if (data.data.success) {
+                    app.successMsg = data.data.message; // Set success message
+                    // Function: After two seconds, clear and re-enable
+                    $timeout(function() {
+                        app.glaccounttypeForm.glaccounttype.$setPristine();
+                        app.glaccounttypeForm.glaccounttype.$setUntouched();
+                        app.successMsg = false; // Clear success message
+                        app.disabled = false; // Enable form for editing
+                        $location.path('/manageglaccounts');
                     }, 2000);
                 } else {
                     app.errorMsg = data.data.message; // Clear any error messages
@@ -289,39 +335,3 @@ angular.module('chapterController', ['chapterServices'])
         }
     };
 });
-
-// .directive('match', function() {
-//       return {
-//         restrict: 'A',
-//         controller: function($scope) { 
-
-//             $scope.confirmed = false;
-
-//             $scope.doConfirm = function (values) {
-//                 values.forEach(function(ele) {
-
-//                     if ($scope.confirm == ele) { 
-
-//                         $scope.confirmed = true;
-
-//                     } else {
-//                         $scope.confirmed = false;
-//                     }
-//                 });
-                    
-//             }
-//         },
-
-//         link: function(scope, element, attrs) {
-//             attrs.$observe('match', function() {
-//                 scope.matches = JSON.parse(attrs.match);
-//                 scope.doConfirm(scope.matches);
-//             });
-
-//             scope.$watch('confirm', function() {
-//                 scope.matches = JSON.parse(attrs.match);
-//                 scope.doConfirm(scope.matches);
-//             });
-//         }
-//       };
-// })

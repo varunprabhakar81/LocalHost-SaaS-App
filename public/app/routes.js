@@ -221,6 +221,38 @@ var app = angular.module('appRoutes',['ngRoute'])
         permission: ['admin', 'moderator']
     })
 
+	.when('/config', {
+		templateUrl: 'app/views/pages/administration/config.html',
+		controller: 'configCtrl',
+		controllerAs: 'config',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
+	.when('/addglaccount', {
+		templateUrl: 'app/views/pages/administration/glaccount/addglaccount.html',
+		controller: 'glaccountCtrl',
+		controllerAs: 'glaccount',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
+	.when('/manageglaccounts', {
+		templateUrl: 'app/views/pages/administration/glaccount/manageglaccounts.html',
+		controller: 'glaccountCtrl',
+		controllerAs: 'glaccount',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
+    .when('/editglaccount/:id', {
+        templateUrl: 'app/views/pages/administration/glaccount/editglaccount.html',
+        controller: 'editGLAccountCtrl',
+        controllerAs: 'editGLAccount',
+        authenticated: true,
+        permission: ['admin', 'moderator']
+    })
+
 	.otherwise({ redirectTo: '/'});
 
 	$locationProvider.html5Mode({

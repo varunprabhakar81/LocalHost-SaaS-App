@@ -139,7 +139,7 @@ angular.module('managementController', [])
 })
 
 // Controller: Used to edit users
-.controller('editCtrl', function($scope, $routeParams, User, $timeout) {
+.controller('editCtrl', function($scope, $routeParams, User, $timeout, $location) {
     var app = this;
     $scope.nameTab = 'active'; // Set the 'name' tab to the default active tab
     app.phase1 = true; // Set the 'name' tab to default view
@@ -241,6 +241,7 @@ angular.module('managementController', [])
                         app.nameForm.name.$setUntouched(); // Reset name form
                         app.successMsg = false; // Clear success message
                         app.disabled = false; // Enable form for editing
+                        $location.path('/management');
                     }, 2000);
                 } else {
                     app.errorMsg = data.data.message; // Clear any error messages
@@ -273,6 +274,7 @@ angular.module('managementController', [])
                         app.emailForm.email.$setUntouched(); // Reset e-mail form
                         app.successMsg = false; // Clear success message
                         app.disabled = false; // Enable form for editing
+                        $location.path('/management');
                     }, 2000);
                 } else {
                     app.errorMsg = data.data.message; // Set error message
@@ -305,6 +307,7 @@ angular.module('managementController', [])
                         app.usernameForm.username.$setUntouched(); // Reset username form
                         app.successMsg = false; // Clear success message
                         app.disabled = false; // Enable form for editing
+                        $location.path('/management');
                     }, 2000);
                 } else {
                     app.errorMsg = data.data.message; // Set error message
@@ -349,6 +352,7 @@ angular.module('managementController', [])
                         app.disableModerator = false; // Unlock the 'moderator' button
                         app.disableUser = false; // unlock the 'user' button
                     }
+                    $location.path('/management');
                 }, 2000);
             } else {
                 app.errorMsg = data.data.message; // Set error message
