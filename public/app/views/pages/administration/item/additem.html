@@ -1,0 +1,60 @@
+<div class  "page-header" > 
+
+<h1>Create Item</h1>
+
+</div>
+
+<form name ="itemAddForm" ng-submit ="item.addItem(itemData, itemAddForm.$valid)" novalidate>
+	<div class="form-group" ng-class="{'has-error': (!itemAddForm.itemname.$valid && !itemAddForm.itemname.$pristine) || (!itemAddForm.itemname.$valid && itemAddForm.$submitted) , 'has-success': itemAddForm.itemname.$valid && !itemAddForm.itemname.$pristine}">
+
+		
+		<label>Item Name:</label>
+		<input class="form-control" type="text" name="itemname" placeholder="please enter item name" ng-model="item.itemData.itemname" ng-pattern="/^[a-zA-Z\d\-_\s]+$/" required>
+		<p class="help-block" ng-show="(!itemAddForm.itemname.$pristine && itemAddForm.itemname.$error.required) || (itemAddForm.$submitted && itemAddForm.itemname.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!itemAddForm.itemname.$pristine && itemAddForm.itemname.$error.pattern)" class="help-block">
+			<li> Must not contain any special characters</li>
+		</ul>
+
+	</div>
+
+<!-- 	<div class="form-group" ng-class="{'has-error': (!itemAddForm.itemincomeaccount.$valid && !itemAddForm.itemincomeaccount.$pristine) || (!itemAddForm.itemincomeaccount.$valid && itemAddForm.$submitted) , 'has-success': itemAddForm.itemincomeaccount.$valid && !itemAddForm.itemincomeaccount.$pristine}"> -->
+	<div>
+
+		
+		<label>Income Account:</label>
+<!-- 		<input class="form-control" type="text" name="itemincomeaccount" placeholder="please enter item income account" ng-model="item.itemData.itemincomeaccount" ng-pattern="/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/" required> -->
+		<select class="form-control" ng-model="item.itemData.incomeacct" ng-options="incomeaccount.glaccountnumber + ' - ' + incomeaccount.glaccountname for incomeaccount in item.incomeaccounts"></select>
+
+		<p class="help-block" ng-show="(!itemAddForm.incomeacct.$pristine && itemAddForm.incomeacct.$error.required) || (itemAddForm.$submitted && itemAddForm.incomeacct.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!itemAddForm.incomeacct.$pristine && itemAddForm.incomeacct.$error.pattern)" class="help-block">
+			<li> Please select valid income account</li>
+		</ul>
+
+	</div>
+	<br>
+	
+	<button ng-disabled="register.disabled" class="btn btn-primary" type="submit">Create Item</button>
+</form>
+
+
+<br>
+
+
+<div class = "jumbotron text-center" ng-show="item.loading">
+	<span class = "glymphicon glymphicon-repeat spinner"></span>
+	<p>Loading...</p>
+
+</div>
+<br>
+
+<div class="row show-hide-message" ng-show="item.successMsg">
+	<div class="alert alert-success">{{item.successMsg}}</div>
+</div>
+	
+	<br>
+
+<div class="row show-hide-message" ng-show="item.errorMsg">
+	<div class="alert alert-danger">{{item.errorMsg}}</div>
+</div>

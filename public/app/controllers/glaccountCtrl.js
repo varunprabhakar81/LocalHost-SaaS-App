@@ -305,7 +305,6 @@ angular.module('glaccountController', ['glaccountServices'])
         app.errorMsg = false; // Clear any error messages
         app.disabled = true; // Disable form while processing
 
-        console.log(newGLAccountType);
 
         if (valid) {
             var glaccountObject = {}; // Create a user object to pass to function

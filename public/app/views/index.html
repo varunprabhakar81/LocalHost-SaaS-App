@@ -34,6 +34,7 @@
   <script src="app/controllers/invoiceCtrl.js"></script>
   <script src="app/controllers/configCtrl.js"></script>
   <script src="app/controllers/glaccountCtrl.js"></script>
+    <script src="app/controllers/itemCtrl.js"></script>
   <!-- <script src="app/controllers/invoiceCtrl.js"></script> -->
 
   <!-- Angular Services -->
@@ -43,6 +44,7 @@
   <script src="app/services/memberServices.js"></script>
   <script src="app/services/configServices.js"></script>
   <script src="app/services/glaccountServices.js"></script>
+  <script src="app/services/itemServices.js"></script>
 
   <title>SaaS Prototype</title>
 
@@ -69,18 +71,6 @@
         <li class="nav-item active">
           <a class="nav-link" ng-show="main.isLoggedIn" href="#" ng-click="main.logout()">Logout <span class="sr-only">(current)</span></a>
         </li>
-
-<!--         <li class="nav-item active">
-          <a class="nav-link" ng-show="main.isLoggedIn" href="/invoice">Create Invoice <span class="sr-only">(current)</span></a>
-        </li> -->
-
-<!--         <li class="nav-item active">
-          <a class="nav-link" ng-show="main.isLoggedIn" href="/invoice_second">Create Invoice - 2 <span class="sr-only">(current)</span></a>
-        </li> -->
-<!-- 
-        <li class="nav-item active">
-          <a class="nav-link" ng-show="main.isLoggedIn" href="/transactions/invoice">Create Invoice <span class="sr-only">(current)</span></a>
-        </li> -->
 
 
 
@@ -120,6 +110,7 @@
             <a class="dropdown-item" href="/managechapters">Manage Chapters</a>
             <a class="dropdown-item" href="/manageglaccounts">Manage GL Accounts</a>
             <a class="dropdown-item" href="/management">Manage Users</a>
+            <a class="dropdown-item" href="/manageitems">Manage Items</a>
 
           </div>
         </li>

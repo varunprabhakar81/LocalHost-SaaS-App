@@ -253,6 +253,30 @@ var app = angular.module('appRoutes',['ngRoute'])
         permission: ['admin', 'moderator']
     })
 
+	.when('/additem', {
+		templateUrl: 'app/views/pages/administration/item/additem.html',
+		controller: 'itemCtrl',
+		controllerAs: 'item',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
+	.when('/manageitems', {
+		templateUrl: 'app/views/pages/administration/item/manageitems.html',
+		controller: 'itemCtrl',
+		controllerAs: 'item',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
+    .when('/edititem/:id', {
+        templateUrl: 'app/views/pages/administration/item/edititem.html',
+        controller: 'editItemCtrl',
+        controllerAs: 'editItem',
+        authenticated: true,
+        permission: ['admin', 'moderator']
+    })
+
 	.otherwise({ redirectTo: '/'});
 
 	$locationProvider.html5Mode({

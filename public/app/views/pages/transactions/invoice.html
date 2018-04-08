@@ -58,7 +58,8 @@
             </div>
             <div class="form-group col-md-6">
                 <label for="araccount">Accounts Receivable Account</label>
-                <input type="text" class="form-control" id="araccount" placeholder="Accounts Receivable Account">
+<!--                 <input type="text" class="form-control" id="araccount" placeholder="Accounts Receivable Account"> -->
+                <select class="form-control" ng-model="araccount" ng-options="araccount.glaccountnumber + ' - ' + araccount.glaccountname for araccount in invoice.araccounts"></select>
             </div>
         </div>
     </div>
@@ -69,7 +70,7 @@
         <div class="form-row">
             <div class="form-group col-md-4">
                 <label for="paymentmethod">Payment Method</label>
-                <input type="date" class="form-control" id="paymentmethod" placeholder="Payment Method">
+                <input type="text" class="form-control" id="paymentmethod" placeholder="Payment Method">
             </div>
             <div class="form-group col-md-4">
                 <label for="terms">Currency</label>
@@ -84,31 +85,48 @@
 
     <table class="table table-bordered">
         <tr class="bg-light">
+            <th><input type="checkbox" ng-model="selectedAll" ng-click="invoice.checkAllLines()" /></th>
             <th>Item</th>
             <th>Quantity</th>
             <th>Rate</th>
-            <th>Amount</th> 
-            <th></th>  
+            <th>Amount</th>  
         </tr>
-        <!-- <tr ng-repeat="person in management.users |filter: searchFilter |limitTo: management.limit"> -->
         <tr>
-            <td style="width: 40%">ABCDEF</td>
-            <td style="width: 12%">0</td>
-            <td style="width: 12%">100</td>
-            <td style="width: 12%">0</td>
-            <td style="width: 24%">
-<!--                     <span class="oi oi-plus" title="icon name" aria-hidden="true" class="text-primary"></span>
-                    <span class="oi oi-minus" title="icon name" aria-hidden="true" class="text-primary"></span> -->
-                <button type="button" class="btn btn-primary btn-sm">Add Another Item</button>
-                <button type="button" class="btn btn-danger btn-sm">Remove Item</button>
+        <tr ng-repeat="line in lines">
+            <td>
+                <input type="checkbox" ng-model="line.selected">
+            </td>
+            <td>
+                <select  class="formControl" name="repeatSelect" id="repeatSelect" ng-model="line.item">
+                    <option ng-repeat="item in invoice.items" value="{{ item.itemname }}">{{ item.itemname }}</option>
+                </select></td>
+            </td>
+            <td>
+                <input type="number" class="form-control" ng-model="line.quantity" ng-change="invoice.calcLineAmount(lines.length);" required">
+            </td>
+            <td>
+                <input type="number" class="form-control" ng-model="line.rate" ng-change="invoice.calcLineAmount(lines.length);" required>
+            </td>
+            <td>
+                <input type="number" class="form-control" ng-model="line.amount" ng-disabled="(!line.quantity || !line.rate)">           
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td colspan="12">
+                <button type="button" class="btn btn-primary btn-sm" align="right" ng-click="invoice.addNewLine(lines.length);" >Add Line</button>
+                <button type="button" class="btn btn-danger btn-sm" align="right" ng-click="invoice.removeLine();" >Remove Line(s)</button>
             </td>
         </tr>
 
         <tr>
+
             <th colspan="9">
-                <div class="row">
-                    <div class="col-sm-10 text-right">Total</div>
-                    <div class="col-sm-2 text-right">0</div>
+            <div class="row">
+                <div class="col-sm-10 text-right">Total</div>
+                <div class="col-sm-2 text-right">0</div>
                 </div>
             </th>
         </tr>

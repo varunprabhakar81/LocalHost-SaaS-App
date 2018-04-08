@@ -25,5 +25,9 @@ angular.module('glaccountServices', [])
         return $http.put('/api/editglaccount/',id);
     };
 
+    glaccountFactory.getGLAccountByType = function(type) {
+        return $http.get('/api/getglaccountbytype/'+type);
+    };
+
 	return glaccountFactory;
 })

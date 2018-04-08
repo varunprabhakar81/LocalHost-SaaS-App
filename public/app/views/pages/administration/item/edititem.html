@@ -1,0 +1,65 @@
+<div class  "page-header" > 
+    <h1>Edit Item</h1>
+</div>
+
+<br>
+
+<nav>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <a class="nav-item nav-link PrimaryInfoTab" ng-click="editItem.PrimaryInfoPhase();" ng-class="PrimaryInfoTab" data-toggle="tab" href="#" role="presentation" aria-controls="PrimaryInfoTab">Primary Information</a>
+    <a class="nav-item nav-link AdditionalInfoTab" ng-click="editItem.AdditionalInfoPhase();" ng-class="AdditionalInfoTab" data-toggle="tab" href="#" role="presentation" aria-controls="AdditionalInfoTab">Additional Information</a>
+  </div>
+</nav>
+
+
+<form name="editItem.PrimaryInfoForm" ng-show="editItem.phase1" ng-submit="editItem.updatePrimaryInfo(newPrimaryInfo, editItem.PrimaryInfoForm.$valid)" novalidate>
+    <div ng-class="{ 'has-success':(editItem.PrimaryInfoForm.itemname.$valid && !editItem.PrimaryInfoForm.itemname.$pristine), 'has-error':(!editItem.PrimaryInfoForm.itemname.$valid && !editItem.PrimaryInfoForm.itemname.$pristine) || (!PrimaryInfoForm.itemname.$valid && PrimaryInfoForm.$submitted) }">
+        <label>Name:</label>
+        <input ng-disabled="editItem.disabled" class="form-control" type="text" name="itemname" placeholder="please enter item name" ng-model="newPrimaryInfo.itemname" ng-pattern="/^[a-zA-Z\d\-_\s]+$/" required>
+        <p class="help-block" ng-show="(!editItem.PrimaryInfoForm.itemname.$pristine && PrimaryInfoForm.itemname.$error.required) || (editItem.PrimaryInfoForm.$submitted && editItem.PrimaryInfoForm.itemname.$error.required)">This field is required</p>
+        <ul ng-show="(!editItem.PrimaryInfoForm.itemname.$pristine && editItem.PrimaryInfoForm.itemname.$error.pattern)" class="help-block">
+            <li> Must not contain any special characters</li>
+        </ul>
+    </div>
+    <br>
+
+    <div>
+        <label>Income Account:</label>
+<!--         <input ng-disabled="editItem.disabled" class="form-control" type="text" name="itemincomeaccount" placeholder="please enter item itemincomeaccount" ng-model="newPrimaryInfo.itemincomeaccount" ng-pattern="/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/" required> -->
+
+<!--         <select class="form-control" ng-model="itemincomeaccount" ng-options="incomeaccount.glaccountnumber + ' - ' + incomeaccount.glaccountname for incomeaccount in item.incomeaccounts"></select> -->
+
+       <select ng-model="newPrimaryInfo.incomeacct" name="incomeacct" ng-options="incomeaccount.glaccountnumber + ' - ' + incomeaccount.glaccountname for incomeaccount in editItem.incomeaccounts track by incomeaccount._id"></select>
+
+
+        <p class="help-block" ng-show="(!editItem.PrimaryInfoForm.incomeacct.$pristine && PrimaryInfoForm.incomeacct.$error.required) || (editItem.PrimaryInfoForm.$submitted && editItem.PrimaryInfoForm.incomeacct.$error.required)">This field is required</p>
+        <ul ng-show="(!editItem.PrimaryInfoForm.incomeacct.$pristine && editItem.PrimaryInfoForm.incomeacct.$error.pattern)" class="help-block">
+            <li> Please enter valid item income account format</li>
+        </ul>
+    </div>
+    <br>
+    <!-- Submit Button -->
+    <button ng-disabled="editItem.disabled" class="btn btn-primary" type="submit">Update</button>
+</form>
+
+<form name="editItem.AdditionalInfoForm" ng-show="editItem.phase2" ng-submit="editItem.updateAdditionalInfo(newAdditionalInfo, editItem.AdditionalInfoForm.$valid)" novalidate>
+    <div>Placeholder</div>
+
+    <br>
+</form>
+
+<br>
+
+<!-- Custom Success Message -->
+<div class="row show-hide-message" ng-show="editItem.successMsg">
+    <div class="alert alert-success">{{ editItem.successMsg }}</div>
+</div>
+<!-- Custom Success Message -->
+
+<br>
+
+<!-- Custom Error Message -->
+<div class="row show-hide-message" ng-show="editItem.errorMsg">
+    <div class="alert alert-danger">{{ editItem.errorMsg }}</div>
+</div>
+<!-- Custom Error Message -->

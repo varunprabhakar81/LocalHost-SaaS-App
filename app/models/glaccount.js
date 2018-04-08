@@ -14,7 +14,7 @@ var nameValidator = [
 var numberValidator = [
   validate({
     validator: 'matches',
-    arguments: /\d/,
+    arguments: /^[0-9]+$/,
     message: 'GL Account number must only contain digits'
   }),
   validate({
@@ -26,7 +26,7 @@ var numberValidator = [
 
 var glaccountSchema = new Schema({
   glaccountname: {type: String, required: true, unique: true, validate: nameValidator},
-  glaccountnumber: {type: String, required: true, validate: numberValidator},
+  glaccountnumber: {type: String, required: true, unique: true, validate: numberValidator},
   glaccounttype: {type: String, required: true}
 });
 

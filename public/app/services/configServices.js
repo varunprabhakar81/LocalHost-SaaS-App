@@ -31,6 +31,25 @@ angular.module('configServices', [])
         {name: 'Other Income'} 
     ];
 
+  // configFactory.PostingPeriods = [
+  //       {name: 'Accounts Payable'},
+  //       {name: 'Accounts Receivable'},
+  //       {name: 'Bank'},
+  //       {name: 'Cost of Goods Sold'},
+  //       {name: 'Deferred Expense'},
+  //       {name: 'Deferred Revenue'},
+  //       {name: 'Expense'},
+  //       {name: 'Fixed Asset'},
+  //       {name: 'Equity'},
+  //       {name: 'Income'},
+  //       {name: 'Long Term Liability'},
+  //       {name: 'Other Asset'},
+  //       {name: 'Other Current Asset'},
+  //       {name: 'Other Current Liability'},
+  //       {name: 'Other Expense'},
+  //       {name: 'Other Income'} 
+  //   ];
+
 	configFactory.title = 'The Matrix';
 
 	return configFactory;

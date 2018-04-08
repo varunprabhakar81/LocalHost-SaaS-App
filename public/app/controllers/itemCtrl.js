@@ -1,6 +1,6 @@
-angular.module('chapterController', ['chapterServices'])
+angular.module('itemController', ['itemServices'])
 
-.controller('chapterCtrl', function($http, $location, $timeout, $scope, Chapter) {
+.controller('itemCtrl', function($http, $location, $timeout, $scope, Item, GLAccount) {
 
     var app = this;
 
@@ -11,17 +11,27 @@ angular.module('chapterController', ['chapterServices'])
     app.deleteAccess = false; // CLear access on load
     app.limit = 20; // Set a default limit to ng-repeat
     app.searchLimit = undefined; // Set the default search page results limit to zero
-    app.showChapterEditModal = false;
+    app.showItemEditModal = false;
     app.choiceMade = false;
     
-    this.addChapter = function(chapterData, valid) {
+    //Item.addTest();
+
+    // Item.addTest().then(function(data) {
+    //         // Check if able to get data from database
+    //         if (data.data.success) {
+    //             console.log(data.data.story.author.name);
+    //         }
+    // });
+
+    this.addItem = function(itemData, valid) {
         app.disabled = true;
         app.errorMsg = false;
         app.successMsg = false;
         app.loading = true;
 
         if (valid) {
-            Chapter.addChapter(app.chapterData).then(function(data) {
+
+            Item.addItem(app.itemData).then(function(data) {
 
             if(data.data.success){
                 app.loading = false;
@@ -29,7 +39,7 @@ angular.module('chapterController', ['chapterServices'])
                 app.successMsg = data.data.message+'...Redirecting';
                 //Redirect to Home Message
                 $timeout(function(){
-                    $location.path('/managechapters');
+                    $location.path('/manageitems');
                 },2000);
                 
             }else {
@@ -48,15 +58,30 @@ angular.module('chapterController', ['chapterServices'])
 
     };
 
-    // Function: get all the chapters from database
-    function getChapters() {
-        // Runs function to get all the chapters from database
-        Chapter.getChapters().then(function(data) {
+    var incomeaccountstype = "Income";
+    
+    app.incomeaccounts = {};
+
+    // Function: get the glaccount that needs to be edited
+    GLAccount.getGLAccountByType(incomeaccountstype).then(function(data) {
+        // Check if the user's _id was found in database
+        if (data.data.success) {
+            app.incomeaccounts = data.data.glaccount;
+        } else {
+             console.log(data.data.message); // Set error message
+        }
+    });
+
+    // Function: get all the items from database
+    function getItems() {
+        // Runs function to get all the items from database
+        Item.getItems().then(function(data) {
             // Check if able to get data from database
             if (data.data.success) {
                 // Check which permissions the logged in user has
                 if (data.data.permission === 'admin' || data.data.permission === 'moderator') {
-                    app.chapters = data.data.chapters; // Assign chapters from database to variable
+                    app.items = data.data.items; // Assign items from database to variable
+
                     app.loading = false; // Stop loading icon
                     app.accessDenied = false; // Show table
 
@@ -79,14 +104,14 @@ angular.module('chapterController', ['chapterServices'])
     }
 
 
-    getChapters(); // Invoke function to get chapters from databases
+    getItems(); // Invoke function to get items from databases
 
-    app.chapterEditModal = function() {
-        $("#chapModal").modal({ backdrop: "static" }); // Open modal
+    app.itemEditModal = function() {
+        $("#itemModal").modal({ backdrop: "static" }); // Open modal
         // Give user 10 seconds to make a decision 'yes'/'no'
         $timeout(function() {
                 if (!app.choiceMade) {
-                    $("#chapModal").modal('hide');// If no choice is made after 10 seconds, select 'no' for them
+                    $("#itemModal").modal('hide');// If no choice is made after 10 seconds, select 'no' for them
                 }
             }, 2500);
     };
@@ -97,8 +122,6 @@ angular.module('chapterController', ['chapterServices'])
     app.showMore = function(number) {
         app.showMoreError = false; // Clear error message
         // Run function only if a valid number above zero
-        console.log(number);
-
         if (number > 0) {
             app.limit = number; // Change ng-repeat filter to number requested by user
         } else if (number == '') {
@@ -114,13 +137,13 @@ angular.module('chapterController', ['chapterServices'])
         app.showMoreError = false; // Clear error message
     };
 
-    // Function: Delete a chapter
-    app.deleteChapter = function(chaptername) {
+    // Function: Delete a item
+    app.deleteItem = function(itemname) {
         // Run function to delete a user
-        Chapter.deleteChapter(chaptername).then(function(data) {
+        Item.deleteItem(itemname).then(function(data) {
             // Check if able to delete user
             if (data.data.success) {
-                getChapters(); // Reset users on page
+                getItems(); // Reset users on page
             } else {
                 app.showMoreError = data.data.message; // Set error message
             }
@@ -187,38 +210,54 @@ angular.module('chapterController', ['chapterServices'])
 })
 
 // Controller: Used to edit users
-.controller('editChapterCtrl', function($scope, $routeParams, User, Chapter, $timeout, $location) {
+.controller('editItemCtrl', function($scope, $routeParams, User, Item, $timeout, $location, GLAccount) {
 
     var app = this;
-    $scope.PrimaryInfoTab = 'active'; // Set the 'chaptername' tab to the default active tab
-    app.phase1 = true; // Set the 'chaptername' tab to default view
+    $scope.PrimaryInfoTab = 'active'; // Set the 'itemname' tab to the default active tab
+    app.phase1 = true; // Set the 'itemname' tab to default view
 
     $scope.newPrimaryInfo = {};
 
-    // Function: get the chapter that needs to be edited
-    Chapter.getChapter($routeParams.id).then(function(data) {
+    var incomeaccountstype = "Income";
+    
+    app.incomeaccounts = {};
+
+    // Function: get the glaccount that needs to be edited
+    GLAccount.getGLAccountByType(incomeaccountstype).then(function(data) {
         // Check if the user's _id was found in database
         if (data.data.success) {
-            $scope.newPrimaryInfo.chaptername = data.data.chapter.chaptername; // Display chapter name in scope
-            $scope.newPrimaryInfo.website = data.data.chapter.website; // Display chapter website in scope
-            app.currentChapter = data.data.chapter._id; // Get user's _id for update functions
+            app.incomeaccounts = data.data.glaccount;
+        } else {
+             console.log(data.data.message); // Set error message
+        }
+    });
+
+
+    // Function: get the item that needs to be edited
+    Item.getItem($routeParams.id).then(function(data) {
+        // Check if the user's _id was found in database
+        if (data.data.success) {
+            $scope.newPrimaryInfo.itemname = data.data.item.itemname;
+            $scope.newPrimaryInfo.incomeacct = data.data.item.incomeacct;
+
+            app.currentItem = data.data.item._id; // Get user's _id for update functions
         } else {
             app.errorMsg = data.data.message; // Set error message
         }
     });
 
     app.PrimaryInfoPhase = function() {
-        $scope.PrimaryInfoTab = 'active'; // Set chapter name list to active
+        $scope.PrimaryInfoTab = 'active'; // Set item name list to active
         $scope.AdditionalInfoTab = 'default'; // Clear website tab
-        app.phase1 = true; // Set chaptername tab active
+        app.phase1 = true; // Set itemname tab active
         app.phase2 = false; // Set website tab inactive
         app.errorMsg = false; // Clear error message
     };
 
     app.AdditionalInfoPhase = function() {
-        $scope.PrimaryInfoTab = 'default'; // Set chapter name list to active
+        $scope.PrimaryInfoTab = 'default'; // Set item name list to active
         $scope.AdditionalInfoTab = 'active'; // Clear website tab
-        app.phase1 = false; // Set chaptername tab active
+        app.phase1 = false; // Set itemname tab active
         app.phase2 = true; // Set website tab inactive
         app.errorMsg = false; // Clear error message
     };
@@ -226,26 +265,27 @@ angular.module('chapterController', ['chapterServices'])
     app.updatePrimaryInfo = function(newPrimaryInfo, valid) {
         app.errorMsg = false; // Clear any error messages
         app.disabled = true; // Disable form while processing
-        // Check if the chaptername being submitted is valid
+        // Check if the itemname being submitted is valid
         if (valid) {
-            var chapterObject = {}; // Create a user object to pass to function
-            chapterObject._id = app.currentChapter; // Get _id to search database
-            chapterObject.chaptername = newPrimaryInfo.chaptername; // Set the new name to the user
-            chapterObject.website = newPrimaryInfo.website; // Set the new name to the user
+            var itemObject = {}; // Create a user object to pass to function
+            itemObject._id = app.currentItem; // Get _id to search database
+            itemObject.itemname = newPrimaryInfo.itemname; // Set the new name to the user
+            itemObject.incomeacct = newPrimaryInfo.incomeacct; // Set the new name to the user
 
-            
             // Runs function to update the user's name
-            Chapter.editChapter(chapterObject).then(function(data) {
+            Item.editItem(itemObject).then(function(data) {
                 // Check if able to edit the user's name
                 if (data.data.success) {
                     app.successMsg = data.data.message; // Set success message
                     // Function: After two seconds, clear and re-enable
                     $timeout(function() {
-                        app.PrimaryInfoForm.chaptername.$setPristine();
-                        app.PrimaryInfoForm.chaptername.$setUntouched();
+                        // $scope.PrimaryInfoForm.itemname.$setPristine();
+                        // $scope.PrimaryInfoForm.itemname.$setUntouched();
+                        // $scope.PrimaryInfoForm.incomeacct.$setPristine();
+                        // $scope.PrimaryInfoForm.incomeacct.$setUntouched();
                         app.successMsg = false; // Clear success message
                         app.disabled = false; // Enable form for editing
-                        $location.path('/managechapters');
+                        $location.path('/manageitems');
                     }, 2000);
                 } else {
                     app.errorMsg = data.data.message; // Clear any error messages
@@ -263,39 +303,3 @@ angular.module('chapterController', ['chapterServices'])
     };
 
 });
-
-// .directive('match', function() {
-//       return {
-//         restrict: 'A',
-//         controller: function($scope) { 
-
-//             $scope.confirmed = false;
-
-//             $scope.doConfirm = function (values) {
-//                 values.forEach(function(ele) {
-
-//                     if ($scope.confirm == ele) { 
-
-//                         $scope.confirmed = true;
-
-//                     } else {
-//                         $scope.confirmed = false;
-//                     }
-//                 });
-                    
-//             }
-//         },
-
-//         link: function(scope, element, attrs) {
-//             attrs.$observe('match', function() {
-//                 scope.matches = JSON.parse(attrs.match);
-//                 scope.doConfirm(scope.matches);
-//             });
-
-//             scope.$watch('confirm', function() {
-//                 scope.matches = JSON.parse(attrs.match);
-//                 scope.doConfirm(scope.matches);
-//             });
-//         }
-//       };
-// })
