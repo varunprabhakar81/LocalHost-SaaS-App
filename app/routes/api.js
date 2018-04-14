@@ -3,8 +3,8 @@ var Chapter = require('../models/chapter')
 var Member = require('../models/member')
 var GLAccount = require('../models/glaccount')
 var Item = require('../models/item')
-var Individual = require('../models/testrelationships')
-var Story = require('../models/testrelationships')
+var Invoice = require('../models/invoice')
+var InvoiceLine = require('../models/invoiceline')
 var jwt = require('jsonwebtoken');
 var secret = 'harryporter';
 var nodemailer = require('nodemailer');
@@ -78,10 +78,10 @@ module.exports = function(router) {
 
 					client.sendMail(email, function(err, info){
 					    if (err ){
-					      console.log(error);
+					      //console.log(error);
 					    }
 					    else {
-					      console.log('Message sent: ' + info.response);
+					      //console.log('Message sent: ' + info.response);
 					    }
 					});
 					res.json({success: true, message: 'Account registered! Please check your e-mail for activation link.'});
@@ -1413,7 +1413,376 @@ module.exports = function(router) {
     });
 
 
-	router.post('/testrelationships',(req, res) => {
+ 	//Invoice Post Route
+	router.post('/addinvoice',(req, res) => {
+		var invoice = new Invoice();
+		invoice.amountdue = req.body.amountdue;
+		invoice.amountpaid = req.body.amountpaid;
+		invoice.amountremaining = req.body.amountremaining;
+		invoice.aracct = req.body.aracct;
+		invoice.billingemail = req.body.billingemail;
+		invoice.chapter = req.body.chapter;
+		invoice.invoicedate = req.body.invoicedate;
+		invoice.invoiceduedate = req.body.invoiceduedate;
+
+		//*! FIX 
+		if(req.body.invoiceterms != null && req.body.invoiceterms !='') {
+			invoice.invoiceterms = req.body.invoiceterms.days;
+		}
+		
+
+		invoice.member = req.body.member;
+		invoice.postingperiod = req.body.postingperiod;
+
+		if( 
+			req.body.amountdue == null || 
+			req.body.amountpaid == null ||
+			req.body.amountremaining == null ||
+			req.body.aracct == null || req.body.aracct == '' ||
+			req.body.billingemail == null || req.body.billingemail == '' ||
+			req.body.chapter == null || req.body.chapter == '' ||
+			req.body.invoicedate == null || req.body.invoicedate == '' ||
+			req.body.invoiceduedate == null || req.body.invoiceduedate == '' ||
+			req.body.invoiceterms == null || req.body.invoiceterms == '' ||
+			req.body.member == null || req.body.member == '' ||
+			req.body.postingperiod == null || req.body.postingperiod == '') {
+			res.json({success: false, message:'Ensure all Invoice mandatory fields are provided'})
+		}
+		else { 
+			invoice.save(function(err){
+				if (err) {
+					if (err.errors != null) {
+						if (err.errors.amountdue) {
+							res.json({success: false, message: err.errors.amountdue.message});
+						} else if (err.errors.amountpaid) {
+							res.json({success: false, message: err.errors.amountpaid.message});
+						} else if (err.errors.amountremaining) {
+							res.json({success: false, message: err.errors.amountremaining.message});
+						} else if (err.errors.aracct) {
+							res.json({success: false, message: err.errors.aracct.message});
+						} else if (err.errors.billingemail) {
+							res.json({success: false, message: err.errors.billingemail.message});
+						} else if (err.errors.chapter) {
+							res.json({success: false, message: err.errors.chapter.message});
+						} else if (err.errors.invoicedate) {
+							res.json({success: false, message: err.errors.invoicedate.message});
+						} else if (err.errors.invoiceduedate) {
+							res.json({success: false, message: err.errors.invoiceduedate.message});
+						} else if (err.errors.invoiceterms) {
+							res.json({success: false, message: err.errors.invoiceterms.message});
+						} else if (err.errors.member) {
+							res.json({success: false, message: err.errors.member.message});
+						} else if (err.errors.postingperiod) {
+							res.json({success: false, message: err.errors.postingperiod.message});
+						} else {
+							res.json({success: false, message: err});
+						}
+					} else if(err) {
+						console.log(err);
+						res.json({success: false, message: err.errmsg});
+					}
+				}
+				else {
+					res.json({success: true, invoice:invoice, message: 'Invoice created!'});
+				}
+			});
+		}
+	});
+
+	router.get('/getinvoices/', function(req, res) {
+		Invoice.find({}).populate('aracct lines').exec(function(err, invoices) {
+		//Invoice.find({}).exec(function(err, invoices) {
+			if (err) throw err; // Throw error if cannot connect
+
+			User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+				if (err) throw err;
+				if(!mainUser) {
+					res.json({success: false, message: 'No user found'});
+				} else {
+
+					if (mainUser.permission === 'admin' || mainUser.permission == 'moderator') {
+						if(!invoices) {
+							res.json({success: false, message: 'No Invoices found'});
+						} else {
+							res.json({success: true, invoices: invoices, permission: mainUser.permission});
+				
+						}
+					} else {
+						res.json({success: false, message: 'Insufficient Permissions'});
+					}
+				}
+			});
+		});
+	});
+
+
+	router.delete('/deleteinvoice/:id', function(req, res) {
+		var deletedInvoice = req.params.id;
+
+		User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+			if (err) throw err;
+			if (!mainUser) {
+				res.json({success: false, message: 'No user found'});
+			} else {
+				if (mainUser.permission != 'admin') {
+					res.json({success: false, message: 'Insufficient Permissions'});
+				} else {
+					Invoice.findOneAndRemove({ _id: deletedInvoice }, function(err, user) {
+						if(err) throw err;
+						res.json({success: true});
+					});
+				}
+			}
+		});
+	});
+
+
+    // Route to get the invoice that needs to be edited
+    router.get('/editinvoice/:id', function(req, res) {
+        var editInvoice = req.params.id; // Assign the _id from parameters to variable
+
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw error if cannot connect
+            // Check if logged in user was found in database
+            if (!mainUser) {
+                res.json({ success: false, message: 'No user found' }); // Return error
+            } else {
+                // Check if logged in user has editing privileges
+                if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+                    // Find the user to be editted
+                    Invoice.findOne({ _id: editInvoice }).populate('aracct lines').exec(function(err, invoice) {
+                        if (err) throw err; // Throw error if cannot connect
+                        // Check if user to edit is in database
+                        if (!invoice) {
+                            res.json({ success: false, message: 'No Invoice found' }); // Return error
+                        } else {
+                            res.json({ success: true, invoice: invoice }); // Return the user to be editted
+                        }
+                    });
+                } else {
+                    res.json({ success: false, message: 'Insufficient Permissions' }); // Return access error
+                }
+            }
+        });
+    });
+
+
+ 	// Route to update/edit a invoice
+    router.put('/invoicelinklines', function(req, res) {
+        var editInvoice = req.body._id;
+        var newInvoiceData = req.body;
+
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw err if cannot connnect
+            // Check if logged in user is found in database
+            if (!mainUser) {
+                res.json({ success: false, message: "no user found" }); // Return erro
+            } else {
+            	if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+					Invoice.findOne({ _id: editInvoice }).populate('lines').exec(function(err, invoice) {
+						if (err) throw err; // Throw error if cannot connect
+
+                        if (!invoice) {
+                                res.json({ success: false, message: 'No invoice found' }); // Return error
+                        } else {
+							InvoiceLine.find({ invoice: invoice }).exec(function(err, invoicelines) {
+								if(!invoicelines) {
+									res.json({success: false, message: 'No Invoice lines'});
+								} else {
+									invoicelines.forEach(function(line) {
+										invoice.lines.push(line);
+									});
+									console.log(invoice);
+		                            // Save changes
+		                            invoice.save(function(err) {
+		                                if (err) {
+		                                    console.log(err); // Log any errors to the console
+		                                } else {
+		                                    res.json({ success: true, message: 'Invoice info has been updated!' }); // Return success message
+		                                }
+		                            });
+								}
+	                        });
+						}
+                    });
+                } else {
+               		res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+                }
+            }
+        });
+    });
+
+	router.post('/addinvoiceline',(req, res) => {
+		var invoiceline = new InvoiceLine();
+		invoiceline.invoice = req.body.invoice;
+		invoiceline.item = req.body.item;
+		invoiceline.quantity = req.body.quantity;
+		invoiceline.rate = req.body.rate;
+		invoiceline.amount = req.body.amount;
+		
+		if( 
+			//*!! FIX Invoice Link
+			//req.body.invoice == null || req.body.invoice == '' ||
+			req.body.item == null || req.body.item == '' ||
+			req.body.quantity == null ||
+			req.body.rate == null ||
+			req.body.amount == null || req.body.amount == '') {
+			res.json({success: false, message:'Ensure all Invoice Line mandatory fields are provided'})
+		}
+		else { 
+			invoiceline.save(function(err){
+				if (err) {
+					if (err.errors != null) {
+						if (err.errors.invoice) {
+							res.json({success: false, message: err.errors.invoice.message});
+						} else if (err.errors.item) {
+							res.json({success: false, message: err.errors.item.message});
+						} else if (err.errors.quantity) {
+							res.json({success: false, message: err.errors.quantity.message});
+						} else if (err.errors.rate) {
+							res.json({success: false, message: err.errors.rate.message});
+						} else if (err.errors.amount) {
+							res.json({success: false, message: err.errors.amount.message});
+						} else {
+							res.json({success: false, message: err});
+						}
+					} else if(err) {
+						console.log(err);
+						res.json({success: false, message: err.errmsg});
+					}
+				}
+				else {
+					res.json({success: true, invoiceline:invoiceline, message: 'Invoice line created!'});
+				}
+			});
+		}
+	});
+
+	router.get('/getinvoicelines/', function(req, res) {
+		var Invoice = req.body.invoice;
+
+		Invoice.find({invoice: req.body.invoice }).populate('invoice item').exec(function(err, invoicelines) {
+		//Invoice.find({}).exec(function(err, invoices) {
+			if (err) throw err; // Throw error if cannot connect
+
+			User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+				if (err) throw err;
+				if(!mainUser) {
+					res.json({success: false, message: 'No user found'});
+				} else {
+
+					if (mainUser.permission === 'admin' || mainUser.permission == 'moderator') {
+						if(!invoices) {
+							res.json({success: false, message: 'No invoice lines found'});
+						} else {
+							res.json({success: true, invoicelines: invoicelines, permission: mainUser.permission});
+				
+						}
+					} else {
+						res.json({success: false, message: 'Insufficient Permissions'});
+					}
+				}
+			});
+		});
+	});
+
+
+router.delete('/deleteinvoiceline/:id', function(req, res) {
+		var deletedInvoiceLine = req.params.id;
+
+		User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+			if (err) throw err;
+			if (!mainUser) {
+				res.json({success: false, message: 'No user found'});
+			} else {
+				if (mainUser.permission != 'admin') {
+					res.json({success: false, message: 'Insufficient Permissions'});
+				} else {
+					InvoiceLine.findOneAndRemove({ _id: deletedInvoiceLine }, function(err, user) {
+						if(err) throw err;
+						res.json({success: true});
+					});
+				}
+			}
+		});
+	});
+
+
+    // Route to get the invoice that needs to be edited
+    router.get('/editinvoiceline/:id', function(req, res) {
+        var editInvoiceLine = req.params.id; // Assign the _id from parameters to variable
+
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw error if cannot connect
+            // Check if logged in user was found in database
+            if (!mainUser) {
+                res.json({ success: false, message: 'No user found' }); // Return error
+            } else {
+                // Check if logged in user has editing privileges
+                if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+                    // Find the user to be editted
+                    InvoiceLine.findOne({ _id: editInvoiceLine }).populate('invoice item').exec(function(err, invoice) {
+                        if (err) throw err; // Throw error if cannot connect
+                        // Check if user to edit is in database
+                        if (!invoice) {
+                            res.json({ success: false, message: 'No Invoice Line found' }); // Return error
+                        } else {
+                            res.json({ success: true, invoice: invoice }); // Return the user to be editted
+                        }
+                    });
+                } else {
+                    res.json({ success: false, message: 'Insufficient Permissions' }); // Return access error
+                }
+            }
+        });
+    });
+
+
+ 	// // Route to update/edit a invoice
+  //   router.put('/editinvoice', function(req, res) {
+  //       var editInvoice = req.body._id;
+  //       if (req.body.invoicename) var newInvoiceName = req.body.invoicename;
+  //       if (req.body.incomeacct) var newIncomeAcct= req.body.incomeacct;
+
+
+  //       User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+  //           if (err) throw err; // Throw err if cannot connnect
+  //           // Check if logged in user is found in database
+  //           if (!mainUser) {
+  //               res.json({ success: false, message: "no user found" }); // Return erro
+  //           } else {
+  //           	if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+		// 			Invoice.findOne({ _id: editInvoice }).populate('incomeacct').exec(function(err, invoice) {
+		// 				if (err) throw err; // Throw error if cannot connect
+  //                       if (!invoice) {
+  //                               res.json({ success: false, message: 'No invoice found' }); // Return error
+  //                       } else {
+  //                       	if (newInvoiceName) {
+  //                               invoice.invoicename = newInvoiceName; // Assign new name to user in database
+  //                           }
+
+  //                           if (newIncomeAcct) {
+  //                           	invoice.incomeacct= newIncomeAcct;
+  //                           }
+  //                               // Save changes
+  //                               invoice.save(function(err) {
+  //                                   if (err) {
+  //                                       console.log(err); // Log any errors to the console
+  //                                   } else {
+  //                                       res.json({ success: true, message: 'Invoice info has been updated!' }); // Return success message
+  //                                   }
+  //                               });
+  //                           }
+  //                       });
+  //                   } else {
+  //                       res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+  //                   }
+  //           }
+  //       });
+  //   });
+
+
+	// router.post('/testrelationships',(req, res) => {
 
 		// var author = new Individual.Individual({
 		//   _id: new mongoose.Types.ObjectId(),
@@ -1454,19 +1823,19 @@ module.exports = function(router) {
 		// // });
 
 
-Story.Story.
-  findOne({ title: 'Once upon a timex' }).
-  populate('author').
-  exec(function (err, story) {
-    if (err) return handleError(err);
-    console.log('The author is %s', story.author.name);
-    res.json({success: true, story: story});
-    // prints "The author is Ian Fleming"
-  });
+// Story.Story.
+//   findOne({ title: 'Once upon a timex' }).
+//   populate('author').
+//   exec(function (err, story) {
+//     if (err) return handleError(err);
+//     console.log('The author is %s', story.author.name);
+//     res.json({success: true, story: story});
+//     // prints "The author is Ian Fleming"
+//   });
 
 		
 		
-	});
+// 	});
 
 
 

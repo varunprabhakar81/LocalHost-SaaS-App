@@ -292,15 +292,15 @@ angular.module('userControllers', ['userServices'])
 //             $scope.personalDetails = newDataList;
 //         };
     
-//     	$scope.checkAll = function () {
-//         // if (!$scope.selectedAll) {
-//         //     $scope.selectedAll = true;
-//         // } else {
-//         //     $scope.selectedAll = false;
-//         // }
-//         angular.forEach($scope.personalDetails, function(personalDetail) {
-//         	if(personalDetail.item !='')
-//             	personalDetail.selected = $scope.selectedAll;
-//         });
-//     };    
+    // 	$scope.checkAll = function () {
+    //     // if (!$scope.selectedAll) {
+    //     //     $scope.selectedAll = true;
+    //     // } else {
+    //     //     $scope.selectedAll = false;
+    //     // }
+    //     angular.forEach($scope.personalDetails, function(personalDetail) {
+    //     	if(personalDetail.item !='')
+    //         	personalDetail.selected = $scope.selectedAll;
+    //     });
+    // };    
 //  });

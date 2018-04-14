@@ -1,11 +1,14 @@
 angular.module('invoiceController', ['memberController', 'chapterController', 'glaccountController', 'itemController','configServices'])
 
-.controller('invoiceCtrl', function(Member, Chapter, GLAccount, Item, $scope, Config) {
+.controller('invoiceCtrl', function(Member, Chapter, GLAccount, Item, Invoice, InvoiceLine, $timeout, $location,$scope, Config) {
 	var app = this;
-	$scope.billingemail = undefined;
-	$scope.invoicedate = new Date();
-    app.invoiceTerms = Config.invoiceTerms;
+	
+    $scope.invoiceData = {};
+    $scope.invoiceData.billingemail = undefined;
 
+	$scope.invoiceData.invoicedate = new Date();
+    $scope.invoiceData.invoiceduedate = new Date();
+    app.invoiceTerms = Config.invoiceTerms;
 
     $scope.lines = [
     {
@@ -85,7 +88,7 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
         if (data.data.success) {
             app.araccounts = data.data.glaccount;
         } else {
-             console.log(data.data.message); // Set error message
+             // console.log(data.data.message); // Set error message
         }
     });
 
@@ -125,19 +128,23 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
     getMembers();
     getItems(); // Invoke function to get items from databases
 
-    app.copyBillingEmail = function() {
-    	$scope.billingemail = angular.copy($scope.member.email);
+    app.copyBillingEmail = function(member) {
+    	$scope.invoiceData.billingemail = member.email;
     };
 
-    app.calcInvoiceDueDate = function() {
-        $scope.invoiceduedate = new Date();
-        var invoicedate = angular.copy($scope.invoicedate);
-        var termdays = angular.copy($scope.invoiceterms.days);
+    app.calcInvoiceDueDate = function(invoiceData) {
+        var invoicedate = angular.copy($scope.invoiceData.invoicedate);
+        var termdays = angular.copy($scope.invoiceData.invoiceterms.days);
         
         var duedate = new Date();
-        duedate.setDate(invoicedate.getDate() + termdays);
 
-        $scope.invoiceduedate = duedate;
+        if(invoicedate != null && termdays != null) {
+            duedate.setTime( invoicedate.getTime() + termdays * 86400000 );
+            invoiceData.invoiceduedate = duedate;
+            
+            //*!!NEEDS TO BE FIXED
+            invoiceData.postingperiod= '04-2018';
+        }
 
     };
 
@@ -195,6 +202,127 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
          if(lines.item !='')
              lines.selected = $scope.selectedAll;
         });
-    }; 
+    };
+
+    app.total = function(){
+        var total = 0;
+        
+        angular.forEach($scope.lines, function(item){
+             total += item.amount;
+            });
+        return total;
+    };
+
+
+    app.createInvoiceLines = function(lines, invoice, valid) {
+        app.disabled = true;
+        app.errorMsg = false;
+        app.successMsg = false;
+        app.loading = true;
+        app.newlines = [];
+
+        if (valid) {
+            if(lines.length != 0 && lines[0].item !='') {
+                angular.forEach(lines, function(line){
+                    line.invoice = invoice;
+                    InvoiceLine.addInvoiceLine(line).then(function(data) {
+                        if(data.data.success){
+                            //console.log(data.data);
+                            app.loading = false;
+                            app.newlines.push(data.data.invoiceline);
+                            // //Create Success Message
+                            // app.successMsg = data.data.message+'...Redirecting';
+                            // //Redirect to Home Message
+                            // $timeout(function(){
+                            //     $location.path('/');
+                            // },2000);
+                            
+                        }else {
+                            //console.log(data.data);
+                            app.disabled = false;
+                            app.loading = false;
+                            //Create Error Message
+                            app.errorMsg = data.data.message;
+                        }
+                    });
+                });
+            } else {
+                //Create an error message
+                app.loading = false;
+                app.disabled = false;     
+                app.errorMsg = 'Please enter at least one line';
+            }
+        }
+        else {
+            //Create an error message
+            app.loading = false;
+            app.disabled = false;     
+            app.errorMsg = 'Please ensure form is filled out properly';
+        }
+        return (app.errorMsg);
+    };
+
+    app.createInvoice = function(invoiceData,lines,valid) {
+        app.disabled = true;
+        app.errorMsg = false;
+        app.successMsg = false;
+        app.loading = true;
+
+
+        // if(linescreated) {
+
+            //*!! FIX HARD CODED VALUES
+            invoiceData.amountpaid = 0;
+            invoiceData.amountremaining = invoiceData.amountdue ;
+
+            if (valid) {
+                Invoice.addInvoice(invoiceData).then(function(data) {
+                if(data.data.success){
+
+                    var lineserr = app.createInvoiceLines(lines, data.data.invoice, true);
+
+                    if(!lineserr) {
+
+                        invoiceData._id = data.data.invoice._id;
+
+                        Invoice.invoicelinklines(invoiceData).then(function(data) {
+                            // Check if able to edit the user's name
+                            if (data.data.success) {
+                                //*!! FIX - Do something on successful link of invoice to lines
+                            } else {
+                                app.disabled = false;
+                                app.loading = false;
+                                //Create Error Message
+                                app.errorMsg = data.data.message;
+                            }
+                        });
+
+                        app.loading = false;
+                        //Create Success Message
+                        app.successMsg = data.data.message+'...Redirecting';
+                        //Redirect to Home Message
+                        $timeout(function(){
+                            $location.path('/');
+                        },2000);
+                    }
+                    //console.log(data.data);
+                    
+                }else {
+                    //console.log(data.data);
+                    app.disabled = false;
+                    app.loading = false;
+                    //Create Error Message
+                    app.errorMsg = data.data.message;
+                }
+            });
+            } else {
+                //Create an error message
+                app.loading = false;
+                app.disabled = false;
+                app.errorMsg = 'Please ensure form is filled out properly';
+            }
+        // }
+
+    };
 
 })
