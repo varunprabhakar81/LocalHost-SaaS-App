@@ -72,8 +72,8 @@ module.exports = function(router) {
 					  from: 'DigitalCloud ERP Support, support@digitalclouderp.com',
 					  to: user.email,
 					  subject: 'Welcome to DigitalCloud ERP! Confirm Your Email',
-					  text: 'Hello' + user.name +'Thank you for registering at DigitalCloud ERP. Please click on the following link to complete your activation: http://peaceful-oasis-54965.herokuapp.com/activate/' + user.temporarytoken,
-					  html: 'Hello<strong> ' + user.name +'</strong>, <br><br> Thank you for registering at DigitalCloud ERP. Please click on the link below to complete your activation:<br><br> <a href="http://peaceful-oasis-54965.herokuapp.com/activate/' + user.temporarytoken + '">http://peaceful-oasis-54965.herokuapp.com/activate</a>'
+					  text: 'Hello' + user.name +'Thank you for registering at DigitalCloud ERP. Please click on the following link to complete your activation: http://localhost:8080/activate/' + user.temporarytoken,
+					  html: 'Hello<strong> ' + user.name +'</strong>, <br><br> Thank you for registering at DigitalCloud ERP. Please click on the link below to complete your activation:<br><br> <a href="http://localhost:8080/activate/' + user.temporarytoken + '">http://localhost:8080/activate</a>'
 					};
 
 					client.sendMail(email, function(err, info){
@@ -241,8 +241,8 @@ module.exports = function(router) {
 					  from: 'DigitalCloud ERP Support, support@digitalclouderp.com',
 					  to: user.email,
 					  subject: 'DigitalCloud ERP Activation Link Request',
-					  text: 'Hello' + user.name +'You recently requested new account activation link. Please click on the following link to complete your activation: http://peaceful-oasis-54965.herokuapp.com/activate/' + user.temporarytoken,
-					  html: 'Hello<strong> ' + user.name +'</strong>, <br><br> You recently requested new account activation link. Please click on the link below to complete your activation:<br><br> <a href="http://peaceful-oasis-54965.herokuapp.com/activate/' + user.temporarytoken + '">http://peaceful-oasis-54965.herokuapp.com/activate</a>'
+					  text: 'Hello' + user.name +'You recently requested new account activation link. Please click on the following link to complete your activation: http://localhost:8080/activate/' + user.temporarytoken,
+					  html: 'Hello<strong> ' + user.name +'</strong>, <br><br> You recently requested new account activation link. Please click on the link below to complete your activation:<br><br> <a href="http://localhost:8080/activate/' + user.temporarytoken + '">http://localhost:8080/activate</a>'
 					};
 
 					client.sendMail(email, function(err, info){
@@ -314,8 +314,8 @@ module.exports = function(router) {
 							from: 'DigitalCloud ERP Support, support@digitalclouderp.com',
 							to: user.email,
 							subject: 'DigitalCloud ERP Reset Password Request',
-							text: 'Hello ' + user.name + ', You recently request a password reset link. Please click on the link below to reset your password:<br><br><a href="http://peaceful-oasis-54965.herokuapp.com/reset/' + user.resettoken,
-							html: 'Hello<strong> ' + user.name + '</strong>,<br><br>You recently request a password reset link. Please click on the link below to reset your password:<br><br><a href="http://peaceful-oasis-54965.herokuapp.com/reset/' + user.resettoken + '">http://peaceful-oasis-54965.herokuapp.com/reset/</a>'
+							text: 'Hello ' + user.name + ', You recently request a password reset link. Please click on the link below to reset your password:<br><br><a href="http://localhost:8080/reset/' + user.resettoken,
+							html: 'Hello<strong> ' + user.name + '</strong>,<br><br>You recently request a password reset link. Please click on the link below to reset your password:<br><br><a href="http://localhost:8080/reset/' + user.resettoken + '">http://localhost:8080/reset/</a>'
 						};
 						// Function to send e-mail to the user
 						client.sendMail(email, function(err, info) {
