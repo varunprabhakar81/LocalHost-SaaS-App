@@ -277,6 +277,22 @@ var app = angular.module('appRoutes',['ngRoute'])
         permission: ['admin', 'moderator']
     })
 
+	.when('/reports/invoicereport', {
+		templateUrl: 'app/views/pages/reports/invoicereport.html',
+		controller: 'invoicereportCtrl',
+		controllerAs: 'invoicereport',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
+	.when('/viewinvoice/:id', {
+        templateUrl: 'app/views/pages/transactions/invoice.html',
+        controller: 'invoiceCtrl',
+        controllerAs: 'invoice',
+        authenticated: true,
+        permission: ['admin', 'moderator']
+    })
+
 	.otherwise({ redirectTo: '/'});
 
 	$locationProvider.html5Mode({

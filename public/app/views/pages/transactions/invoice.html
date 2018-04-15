@@ -1,6 +1,6 @@
 <div class  "page-header" > 
     <link href="/assets/css/open-iconic-bootstrap.css" rel="stylesheet">
-    <h1>Invoice Form</h1>
+    <h1>Invoice</h1>
 </div>
 
 <br>
@@ -8,24 +8,36 @@
 
 <form name ="invoiceForm">
     <h4>Primary Information</h4>
+    <div>
+      <!-- <div class="form-row"> -->
+        <div class="form-group">
+          <button ng-show="!invoice.create && invoice.view && !invoice.enableedit" type="button" class="btn btn-primary" align="right" ng-click="invoice.editInvoice();" >Edit</button>
+
+        </div>
+    </div>
     <div class="bg-light">
       <!-- <div class="form-row"> -->
         <div class="form-group">
           <label for="chapter">Chapter</label>
-            <select class="form-control" ng-model="invoiceData.chapter" ng-options="u.chaptername for u in invoice.chapters"></select>
+            <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.chapter" ng-options="u.chaptername for u in invoice.chapters"></select>
+            <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" class="form-control" ng-model="invoiceData.chapter.chaptername"></input>
 
         </div>
     
         <div class="form-group">
             <label for="member">Member</label>
-            <select class="form-control" ng-model="invoiceData.member" ng-change="invoice.copyBillingEmail(invoiceData.member);" ng-options="u.membername for u in invoice.members"></select>
+            <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.member" ng-change="invoice.copyBillingEmail(invoiceData.member);" ng-options="u.membername for u in invoice.members"></select>
+
+            <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" class="form-control" ng-model="invoiceData.member.membername"></input>
 
         </div>
 
         <div class="form-group">
             <label for="member">Billing Email</label>
             <!-- <input type="text" class="form-control" id="member" placeholder="Select Member"> -->
-            <input class="form-control" ng-model="invoiceData.billingemail" ng-disabled="!invoiceData.member">
+            <input ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.billingemail" ng-disabled="!invoiceData.member">
+
+            <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" class="form-control" ng-model="invoiceData.billingemail"></input>
 
         </div>
     </div>
@@ -36,27 +48,36 @@
         <div class="form-row">
             <div class="form-group col-md-4">
                 <label for="invoiceData.invoicedate">Invoice Date</label>
-                <input type="date" class="form-control" ng-change="invoice.calcInvoiceDueDate(invoiceData);" ng-model="invoiceData.invoicedate">
+                <input ng-show="invoice.create && !invoice.view" type="date" class="form-control" ng-change="invoice.calcInvoiceDueDate(invoiceData);" ng-model="invoiceData.invoicedate">
+                <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" type="date" class="form-control" ng-change="invoice.calcInvoiceDueDate(invoiceData);" ng-model="invoiceData.invoicedate">
             </div>
             <div class="form-group col-md-4">
-                <label for="terms">Invoice Terms</label>
+                <label ng-show="invoice.create && !invoice.view" for="terms">Invoice Terms</label>
                 <!-- <input type="text" class="form-control" id="terms" placeholder="Terms"> -->
-                <select class="form-control" ng-model="invoiceData.invoiceterms" ng-change="invoice.calcInvoiceDueDate(invoiceData);" ng-options="terms.name for terms in invoice.invoiceTerms"></select>
+                <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.invoiceterms" ng-change="invoice.calcInvoiceDueDate(invoiceData);" ng-options="terms.name for terms in invoice.invoiceTerms"></select>
+
+                <!-- *!! Fix Terms Name -->
+                <label ng-show="!invoice.create && invoice.view" for="terms">Invoice Terms (Days)</label>
+                <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" class="form-control" ng-model="invoiceData.invoiceterms"></input>
+
             </div>
             <div class="form-group col-md-4">
                 <label for="invoiceduedate">Invoice Due Date</label>
-                <input type="date" class="form-control" id="invoiceduedate" ng-model="invoiceData.invoiceduedate" placeholder="Invoice Due Date" ng-disabled="(!invoiceData.invoiceterms || !invoiceData.invoicedate)">
+                <input ng-show="invoice.create && !invoice.view" type="date" class="form-control" id="invoiceduedate" ng-model="invoiceData.invoiceduedate" placeholder="Invoice Due Date" ng-disabled="(!invoiceData.invoiceterms || !invoiceData.invoicedate)">
+                <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" type="date" class="form-control" id="invoiceduedate" ng-model="invoiceData.invoiceduedate" placeholder="Invoice Due Date">
             </div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-6">
                 <label>Posting Period:</label>
-                <label class="form-control" ng-model="invoiceData.postingperiod" ng-disabled="!invoiceData.invoicedate">{{invoiceData.invoicedate | date:'MM-yyyy'}}</label>
+                <label ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.postingperiod" ng-disabled="!invoiceData.invoicedate">{{invoiceData.invoicedate | date:'MM-yyyy'}}</label>
+                <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" class="form-control" ng-show="!invoice.create && invoice.view" ng-model="invoiceData.postingperiod"></input>
             </div>
             <div class="form-group col-md-6">
                 <label for="araccount">Accounts Receivable Account</label>
 <!--                 <input type="text" class="form-control" id="araccount" placeholder="Accounts Receivable Account"> -->
-                <select class="form-control" ng-model="invoiceData.aracct" ng-options="araccount.glaccountnumber + ' - ' + araccount.glaccountname for araccount in invoice.araccounts"></select>
+                <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.aracct" ng-options="araccount.glaccountnumber + ' - ' + araccount.glaccountname for araccount in invoice.araccounts"></select>
+                <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" class="form-control" ng-value="invoiceData.aracct.glaccountnumber+ ' - ' + invoiceData.aracct.glaccountname"></input>
             </div>
         </div>
     </div>
@@ -67,11 +88,13 @@
         <div class="form-row">
             <div class="form-group col-md-4">
                 <label for="paymentmethod">Payment Method</label>
-                <input type="text" class="form-control" ng-model="invoiceData.paymentmethod" id="paymentmethod" placeholder="Payment Method">
+                <input ng-show="invoice.create && !invoice.view" type="text" class="form-control" ng-model="invoiceData.paymentmethod" id="paymentmethod" placeholder="Payment Method">
+                <input ng-show="!invoice.create && invoice.view" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" type="text" class="form-control" ng-model="invoiceData.paymentmethod" id="paymentmethod" placeholder="Payment Method">
             </div>
             <div class="form-group col-md-4">
                 <label for="terms">Currency</label>
-                <input type="text" class="form-control" ng-model="invoiceData.currency" id="currency" placeholder="Currency">
+                <input ng-show="invoice.create && !invoice.view" type="text" class="form-control" ng-model="invoiceData.currency" id="currency" placeholder="Currency">
+                <input ng-show="!invoice.create && invoice.view" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" type="text" class="form-control" ng-model="invoiceData.currency" id="currency" placeholder="Currency">
             </div>
         </div>
     </div>
@@ -82,7 +105,7 @@
 
     <table class="table table-bordered">
         <tr class="bg-light">
-            <th><input type="checkbox" ng-model="selectedAll" ng-click="invoice.checkAllLines()" /></th>
+            <th><input ng-show="invoice.create && !invoice.view" type="checkbox" ng-model="selectedAll" ng-click="invoice.checkAllLines()" /></th>
             <th>Item</th>
             <th>Quantity</th>
             <th>Rate</th>
@@ -91,22 +114,26 @@
         <tr>
         <tr ng-repeat="line in lines">
             <td>
-                <input class="form-control" type="checkbox" ng-model="line.selected">
+                <input ng-show="invoice.create && !invoice.view" class="form-control" type="checkbox" ng-model="line.selected">
             </td>
             <td>
-                <select  class="form-control" name="repeatSelect" id="repeatSelect" ng-model="line.item" ng-options="u.itemname for u in invoice.items">
+                <select  ng-show="invoice.create && !invoice.view" class="form-control" name="repeatSelect" id="repeatSelect" ng-model="line.item" ng-options="u.itemname for u in invoice.items">
                 </select>
+                <input  ng-show="!invoice.create && invoice.view" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" class="form-control" ng-model="line.item.itemname">
+                </input>
 
             </td>
             <td>
-                <input type="integer" class="form-control" ng-model="line.quantity" ng-change="invoice.calcLineAmount(lines.length);" required">
+                <input ng-show="invoice.create && !invoice.view" type="integer" class="form-control" ng-model="line.quantity" ng-change="invoice.calcLineAmount(line);" required">
+                <input ng-show="!invoice.create && invoice.view" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" type="integer" class="form-control" ng-model="line.quantity">
             </td>
             <td>
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text">$</span>
                   </div>
-                  <input type="integer" class="form-control" ng-model="line.rate" ng-change="invoice.calcLineAmount(lines.length);" required>
+                  <input ng-show="invoice.create && !invoice.view" type="integer" class="form-control" ng-model="line.rate" ng-change="invoice.calcLineAmount(line);" required>
+                  <input ng-show="!invoice.create && invoice.view" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" type="integer" class="form-control" ng-model="line.rate">
                 </div>
             </td>
             <td>
@@ -114,7 +141,8 @@
                   <div class="input-group-prepend">
                     <span class="input-group-text">$</span>
                   </div>
-                  <input type="integer" class="form-control" ng-model="line.amount" ng-disabled="(!line.quantity || !line.rate)"> 
+                  <input ng-show="invoice.create && !invoice.view" type="integer" class="form-control" ng-model="line.amount" ng-disabled="(!line.quantity || !line.rate)"> 
+                  <input ng-show="!invoice.create && invoice.view" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" type="integer" class="form-control" ng-model="line.amount">
                 </div>                    
             </td>
 
@@ -123,8 +151,10 @@
         <tr>
 
             <td colspan="12">
-                <button type="button" class="btn btn-primary btn-sm" align="right" ng-click="invoice.addNewLine(lines.length);" >Add Line</button>
-                <button type="button" class="btn btn-danger btn-sm" align="right" ng-click="invoice.removeLine();" >Remove Line(s)</button>
+                <button ng-show="invoice.create && !invoice.view" type="button" class="btn btn-primary btn-sm" align="right" ng-click="invoice.addNewLine(lines.length);" >Add Line</button>
+                <button ng-show="!invoice.create && invoice.view" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" type="button" class="btn btn-primary btn-sm" align="right" ng-click="invoice.addNewLine(lines.length);" >Add Line</button>
+                 <button ng-show="invoice.create && !invoice.view" type="button" class="btn btn-danger btn-sm" align="right" ng-click="invoice.removeLine();" >Remove Line(s)</button>
+                <button ng-show="!invoice.create && invoice.view" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" type="button" class="btn btn-danger btn-sm" align="right" ng-click="invoice.removeLine();" >Remove Line(s)</button>
             </td>
         </tr>
 
@@ -133,7 +163,7 @@
             <th colspan="9">
             <div class="row">
                 <div class="col-sm-10 text-right">Total:</div>
-                <div class="col-sm-2 text-right">${{invoiceData.amountdue=invoice.total()}}</div>
+                <div type="integer" class="col-sm-2 text-right">${{invoiceData.amountdue=invoice.total()}}</div>
                 </div>
             </th>
         </tr>

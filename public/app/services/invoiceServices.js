@@ -37,8 +37,8 @@ angular.module('invoiceServices', [])
 	}
 
 	//Invoice.create(regData)
-	invoiceLineFactory.getInvoiceLines = function() {
-		return $http.get('/api/getinvoicelines');
+	invoiceLineFactory.getInvoiceLines = function(id) {
+		return $http.get('/api/getinvoicelines/'+id);
 	}
 
 	invoiceLineFactory.deleteInvoiceLine = function(invoicelineid) {

@@ -1490,7 +1490,7 @@ module.exports = function(router) {
 	});
 
 	router.get('/getinvoices/', function(req, res) {
-		Invoice.find({}).populate('aracct lines').exec(function(err, invoices) {
+		Invoice.find({}).populate('aracct chapter member lines').exec(function(err, invoices) {
 		//Invoice.find({}).exec(function(err, invoices) {
 			if (err) throw err; // Throw error if cannot connect
 
@@ -1550,7 +1550,7 @@ module.exports = function(router) {
                 // Check if logged in user has editing privileges
                 if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
                     // Find the user to be editted
-                    Invoice.findOne({ _id: editInvoice }).populate('aracct lines').exec(function(err, invoice) {
+                    Invoice.findOne({ _id: editInvoice }).populate('aracct chapter member lines').exec(function(err, invoice) {
                         if (err) throw err; // Throw error if cannot connect
                         // Check if user to edit is in database
                         if (!invoice) {
@@ -1585,7 +1585,7 @@ module.exports = function(router) {
                         if (!invoice) {
                                 res.json({ success: false, message: 'No invoice found' }); // Return error
                         } else {
-							InvoiceLine.find({ invoice: invoice }).exec(function(err, invoicelines) {
+							InvoiceLine.find({ invoice: invoice }).populate('item').exec(function(err, invoicelines) {
 								if(!invoicelines) {
 									res.json({success: false, message: 'No Invoice lines'});
 								} else {
@@ -1658,10 +1658,12 @@ module.exports = function(router) {
 		}
 	});
 
-	router.get('/getinvoicelines/', function(req, res) {
-		var Invoice = req.body.invoice;
+	router.get('/getinvoicelines/:id', function(req, res) {
+		var invoice = req.params.id;
 
-		Invoice.find({invoice: req.body.invoice }).populate('invoice item').exec(function(err, invoicelines) {
+		console.log(req.params.id);
+
+		InvoiceLine.find({invoice: invoice }).populate('invoice item').exec(function(err, invoicelines) {
 		//Invoice.find({}).exec(function(err, invoices) {
 			if (err) throw err; // Throw error if cannot connect
 
@@ -1672,7 +1674,7 @@ module.exports = function(router) {
 				} else {
 
 					if (mainUser.permission === 'admin' || mainUser.permission == 'moderator') {
-						if(!invoices) {
+						if(!invoicelines) {
 							res.json({success: false, message: 'No invoice lines found'});
 						} else {
 							res.json({success: true, invoicelines: invoicelines, permission: mainUser.permission});
