@@ -1,6 +1,6 @@
-angular.module('invoiceController', ['memberController', 'chapterController', 'glaccountController', 'itemController','configServices'])
+angular.module('invoiceController', ['memberController', 'chapterController', 'glaccountController', 'itemController','configServices', 'journalentryServices'])
 
-.controller('invoiceCtrl', function(Member, Chapter, GLAccount, Item, Invoice, InvoiceLine, $timeout, $location, $scope, $routeParams, Config) {
+.controller('invoiceCtrl', function(Member, Chapter, GLAccount, Item, Invoice, InvoiceLine, $timeout, $location, $scope, $routeParams, Config, JournalEntry) {
 	var app = this;
     app.enableedit = false;
 
@@ -22,6 +22,7 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
             'rate':'',
             'amount':'' 
         }];
+
 
         // Function: get all the chapters from database
         function getChapters() {
@@ -265,8 +266,145 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
                 app.disabled = false;     
                 app.errorMsg = 'Please ensure form is filled out properly';
             }
-            return (app.errorMsg);
+            return (!app.errorMsg);
         };
+
+
+        app.createGLLines = function(journal, invoice, invoicelines) {
+            app.disabled = true;
+            app.errorMsg = false;
+            app.successMsg = false;
+            app.loading = true;
+
+            var newline = {};
+
+            newline.chapter = journal.chapter;
+            newline.date = journal.date;
+            newline.journal = journal;
+            newline.postingperiod = journal.postingperiod;
+            newline.transactionsource = invoice;
+
+            //Create Credit Lines
+            if(invoicelines.length != 0 && invoicelines[0].item !='') {
+                angular.forEach(invoicelines, function(invoiceline){
+                    
+                    newline.glacct = invoiceline.item.incomeacct;
+                    newline.creditamt = invoiceline.amount;
+                    newline.debitamt = 0;
+
+
+                    GLLine.addGLLine(newline).then(function(data) {
+                        if(data.data.success){
+                            //console.log(data.data);
+                            app.loading = false;
+                            // //Create Success Message
+                            // app.successMsg = data.data.message+'...Redirecting';
+                            // //Redirect to Home Message
+                            // $timeout(function(){
+                            //     $location.path('/');
+                            // },2000);
+                            
+                        }else {
+                            //console.log(data.data);
+                            app.disabled = false;
+                            app.loading = false;
+                            //Create Error Message
+                            app.errorMsg = data.data.message;
+                        }
+                    });
+                });
+
+                //Create Debit Line
+                newline.glacct = invoice.aracct;
+                newline.debitamt = invoice.amountdue;
+                newline.debitamt = 0;
+
+                GLLine.addGLLine(newline).then(function(data) {
+                    if(data.data.success){
+                        //console.log(data.data);
+                        app.loading = false;
+                        // //Create Success Message
+                        // app.successMsg = data.data.message+'...Redirecting';
+                        // //Redirect to Home Message
+                        // $timeout(function(){
+                        //     $location.path('/');
+                        // },2000);
+                        
+                    }else {
+                        //console.log(data.data);
+                        app.disabled = false;
+                        app.loading = false;
+                        //Create Error Message
+                        app.errorMsg = data.data.message;
+                    }
+                });
+
+            } else {
+                //Create an error message
+                app.loading = false;
+                app.disabled = false;     
+                app.errorMsg = 'Please enter at least one line';
+            }
+
+            return (!app.errorMsg);
+        };
+
+        app.createGLPosting = function(invoiceData, invoicelines) {
+            var JournalEntryData = {};
+
+            app.disabled = true;
+            app.errorMsg = false;
+            app.successMsg = false;
+            app.loading = true;
+
+            console.log(invoiceData);
+
+            JournalEntryData.chapter = invoiceData.invoice.chapter;
+            JournalEntryData.date = invoiceData.invoice.invoicedate;
+            JournalEntryData.postingperiod = invoiceData.invoice.postingperiod;
+
+
+            JournalEntry.addJournalEntry(JournalEntryData).then(function(data) {
+                if(data.data.success){
+
+                    var GLLinesCreated = app.createGLLines(data.data.journalentry, invoiceData, invoicelines);
+
+                    if(GLLinesCreated) {
+
+                        JournalEntryData._id = data.data.journalentry._id;
+
+                        Invoice.journalentrylinklines(JournalEntryData).then(function(data) {
+                            // Check if able to edit the user's name
+                            if (data.data.success) {
+                                //*!! FIX - Do something on successful link of GL Lines to Journal Entry
+                            } else {
+                                app.disabled = false;
+                                app.loading = false;
+                                //Create Error Message
+                                app.errorMsg = data.data.message;
+                            }
+                        });
+
+                        app.loading = false;
+                        //Create Success Message
+                        app.successMsg = data.data.message+'...Redirecting';
+                        //Redirect to Home Message
+                        $timeout(function(){
+                            $location.path('/reports/invoicereport');
+                        },2000);
+                    }
+                    //console.log(data.data);
+                    
+                }else {
+                    //console.log(data.data);
+                    app.disabled = false;
+                    app.loading = false;
+                    //Create Error Message
+                    app.errorMsg = data.data.message;
+                }
+            });
+        };
+
 
         app.createInvoice = function(invoiceData,lines,valid) {
             app.disabled = true;
@@ -285,9 +423,9 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
                     Invoice.addInvoice(invoiceData).then(function(data) {
                     if(data.data.success){
 
-                        var lineserr = app.createInvoiceLines(lines, data.data.invoice, true);
+                        var InvoiceLinesCreated = app.createInvoiceLines(lines, data.data.invoice, true);
 
-                        if(!lineserr) {
+                        if(InvoiceLinesCreated) {
 
                             invoiceData._id = data.data.invoice._id;
 
@@ -295,6 +433,7 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
                                 // Check if able to edit the user's name
                                 if (data.data.success) {
                                     //*!! FIX - Do something on successful link of invoice to lines
+                                    var GLPosted = app.createGLPosting(lines, data.data.invoice);
                                 } else {
                                     app.disabled = false;
                                     app.loading = false;

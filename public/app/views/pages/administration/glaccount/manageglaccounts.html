@@ -1,5 +1,5 @@
 <div class  "page-header" > 
-	<h1>Manage GL Accounts</h1>
+	<h1>Manage General Ledger Accounts</h1>
 </div>
 
 <br>
@@ -62,16 +62,16 @@
 <div class="panel panel-primary">
 	<p align = "right">
 		<a href="/addglaccount" align="right">
-			<button type="button" ng-show="glaccount.editAccess" align="right" class="btn btn-primary">Add GL Account</button>
+			<button type="button" ng-show="glaccount.editAccess" align="right" class="btn btn-primary">Add General Ledger Account</button>
 		</a>
 	</p>
 
 
 	<table class="table table-striped">
 		<tr>
-			<th>Gl Account Number</th>
-			<th>Gl Account Name</th>
-			<th>Gl Account Type</th>
+			<th>Account Number</th>
+			<th>Account Name</th>
+			<th>Account Type</th>
 			<th></th>	
 		</tr>
 		<tr ng-repeat="gl in glaccount.glaccounts |orderBy: 'glaccountnumber' |filter: searchFilter |limitTo: glaccount.limit">

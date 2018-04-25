@@ -39,3 +39,9 @@ app.listen(port, () => {
 	console.log ("Running the server on port "+port);
 });
 
+
+
+const keyPublishable = 'pk_test_iJYFD9W47WsK1phAGzshsrSu';
+const keySecret = 'sk_test_7G7wpThGijNoRsdqcIWlP8UV';
+
+const stripe = require("stripe")(keySecret);

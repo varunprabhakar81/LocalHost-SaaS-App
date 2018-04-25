@@ -5,12 +5,18 @@ var GLAccount = require('../models/glaccount')
 var Item = require('../models/item')
 var Invoice = require('../models/invoice')
 var InvoiceLine = require('../models/invoiceline')
+var JournalEntry = require('../models/journalentry')
+var GLLine = require('../models/glline')
 var jwt = require('jsonwebtoken');
 var secret = 'harryporter';
 var nodemailer = require('nodemailer');
 var sgTransport = require('nodemailer-sendgrid-transport');
 
 var mongoose = require('mongoose');
+
+const keyPublishable = 'pk_test_iJYFD9W47WsK1phAGzshsrSu';
+const keySecret = 'sk_test_7G7wpThGijNoRsdqcIWlP8UV';
+const stripe = require("stripe")(keySecret);
 
 
 //Routes
@@ -24,6 +30,34 @@ module.exports = function(router) {
 	}
 
 	var client = nodemailer.createTransport(sgTransport(options));
+
+
+	router.post("/charge", (req, res) => {
+	  console.log(req.body);
+
+	  // let amount = 500;
+
+	  var amount = req.body.amount;
+	  var description = req.body.description;
+	  var currency = req.body.currency;
+
+	  stripe.customers.create({
+	    email: req.body.token.email,
+	    card: req.body.token.id
+	  })
+	  .then(customer =>
+	    stripe.charges.create({
+	      amount,
+	      description: description,
+	      currency: currency,
+	      customer: customer.id
+	    }))
+	  .then(charge => res.send(charge))
+	  .catch(err => {
+	    console.log("Error:", err);
+	    res.status(500).send({error: "Purchase Failed"});
+	  });
+	});
 
 
 	//USER REGISTRATION ROUTE
@@ -1723,13 +1757,350 @@ router.delete('/deleteinvoiceline/:id', function(req, res) {
                 // Check if logged in user has editing privileges
                 if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
                     // Find the user to be editted
-                    InvoiceLine.findOne({ _id: editInvoiceLine }).populate('invoice item').exec(function(err, invoice) {
+                    InvoiceLine.findOne({ _id: editInvoiceLine }).populate('invoice item').exec(function(err, invoiceline) {
                         if (err) throw err; // Throw error if cannot connect
                         // Check if user to edit is in database
-                        if (!invoice) {
+                        if (!invoiceline) {
                             res.json({ success: false, message: 'No Invoice Line found' }); // Return error
                         } else {
-                            res.json({ success: true, invoice: invoice }); // Return the user to be editted
+                            res.json({ success: true, invoiceline: invoiceline }); // Return the user to be editted
+                        }
+                    });
+                } else {
+                    res.json({ success: false, message: 'Insufficient Permissions' }); // Return access error
+                }
+            }
+        });
+    });
+
+
+ 	// // Route to update/edit a invoice
+  //   router.put('/editinvoice', function(req, res) {
+  //       var editInvoice = req.body._id;
+  //       if (req.body.invoicename) var newInvoiceName = req.body.invoicename;
+  //       if (req.body.incomeacct) var newIncomeAcct= req.body.incomeacct;
+
+
+  //       User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+  //           if (err) throw err; // Throw err if cannot connnect
+  //           // Check if logged in user is found in database
+  //           if (!mainUser) {
+  //               res.json({ success: false, message: "no user found" }); // Return erro
+  //           } else {
+  //           	if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+		// 			Invoice.findOne({ _id: editInvoice }).populate('incomeacct').exec(function(err, invoice) {
+		// 				if (err) throw err; // Throw error if cannot connect
+  //                       if (!invoice) {
+  //                               res.json({ success: false, message: 'No invoice found' }); // Return error
+  //                       } else {
+  //                       	if (newInvoiceName) {
+  //                               invoice.invoicename = newInvoiceName; // Assign new name to user in database
+  //                           }
+
+  //                           if (newIncomeAcct) {
+  //                           	invoice.incomeacct= newIncomeAcct;
+  //                           }
+  //                               // Save changes
+  //                               invoice.save(function(err) {
+  //                                   if (err) {
+  //                                       console.log(err); // Log any errors to the console
+  //                                   } else {
+  //                                       res.json({ success: true, message: 'Invoice info has been updated!' }); // Return success message
+  //                                   }
+  //                               });
+  //                           }
+  //                       });
+  //                   } else {
+  //                       res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+  //                   }
+  //           }
+  //       });
+  //   });
+
+
+
+ 	//Journal Entry Post Route
+	router.post('/addjournalentry',(req, res) => {
+		var journalentry = new JournalEntry();
+		journalentry.chapter = req.body.chapter;
+		journalentry.date = req.body.date;
+		journalentry.postingperiod = req.body.postingperiod;
+
+
+		if( 
+			req.body.chapter == null || req.body.chapter == '' ||
+			req.body.date == null || req.body.date == '' ||
+			req.body.postingperiod == null || req.body.postingperiod == '') {
+			res.json({success: false, message:'Ensure all Journal Entry mandatory fields are provided'})
+		}
+		else { 
+			journalentry.save(function(err){
+				if (err) {
+					if (err.errors != null) {
+						if (err.errors.chapter) {
+							res.json({success: false, message: err.errors.chapter.message});
+						} else if (err.errors.date) {
+							res.json({success: false, message: err.errors.date.message});
+						} else if (err.errors.postingperiod) {
+							res.json({success: false, message: err.errors.postingperiod.message});
+						} else {
+							res.json({success: false, message: err});
+						}
+					} else if(err) {
+						console.log(err);
+						res.json({success: false, message: err.errmsg});
+					}
+				}
+				else {
+					res.json({success: true, journalentry:journalentry, message: 'Journal Entry created!'});
+				}
+			});
+		}
+	});
+
+	router.get('/getjournalentries/', function(req, res) {
+		JournalEntry.find({}).populate('gllines').exec(function(err, journalentries) {
+			if (err) throw err; // Throw error if cannot connect
+
+			User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+				if (err) throw err;
+				if(!mainUser) {
+					res.json({success: false, message: 'No user found'});
+				} else {
+					if (mainUser.permission === 'admin' || mainUser.permission == 'moderator') {
+						if(!journalentrys) {
+							res.json({success: false, message: 'No Journal Entries found'});
+						} else {
+							res.json({success: true, journalentries: journalentries, permission: mainUser.permission});
+				
+						}
+					} else {
+						res.json({success: false, message: 'Insufficient Permissions'});
+					}
+				}
+			});
+		});
+	});
+
+
+	router.delete('/deletejournalentry/:id', function(req, res) {
+		var deletedJournalEntry = req.params.id;
+
+		User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+			if (err) throw err;
+			if (!mainUser) {
+				res.json({success: false, message: 'No user found'});
+			} else {
+				if (mainUser.permission != 'admin') {
+					res.json({success: false, message: 'Insufficient Permissions'});
+				} else {
+					JournalEntry.findOneAndRemove({ _id: deletedJournalEntry }, function(err, user) {
+						if(err) throw err;
+						res.json({success: true});
+					});
+				}
+			}
+		});
+	});
+
+
+    // Route to get the journalentry that needs to be edited
+    router.get('/editjournalentry/:id', function(req, res) {
+        var editJournalEntry = req.params.id; // Assign the _id from parameters to variable
+
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw error if cannot connect
+            // Check if logged in user was found in database
+            if (!mainUser) {
+                res.json({ success: false, message: 'No user found' }); // Return error
+            } else {
+                // Check if logged in user has editing privileges
+                if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+                    // Find the user to be editted
+                    JournalEntry.findOne({ _id: editJournalEntry }).populate('gllines').exec(function(err, journalentry) {
+                        if (err) throw err; // Throw error if cannot connect
+                        // Check if user to edit is in database
+                        if (!journalentry) {
+                            res.json({ success: false, message: 'No Jounral Entry found' }); // Return error
+                        } else {
+                            res.json({ success: true, journalentry: journalentry }); // Return the user to be editted
+                        }
+                    });
+                } else {
+                    res.json({ success: false, message: 'Insufficient Permissions' }); // Return access error
+                }
+            }
+        });
+    });
+
+
+ 	// Route to update/edit a journalentry
+    router.put('/journalentrylinklines', function(req, res) {
+        var editJournalEntry = req.body._id;
+        var newJournalEntryData = req.body;
+
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw err if cannot connnect
+            // Check if logged in user is found in database
+            if (!mainUser) {
+                res.json({ success: false, message: "no user found" }); // Return erro
+            } else {
+            	if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+					JournalEntry.findOne({ _id: editJournalEntry }).populate('gllines').exec(function(err, journalentry) {
+						if (err) throw err; // Throw error if cannot connect
+
+                        if (!journalentry) {
+                                res.json({ success: false, message: 'No Journal Entry found' }); // Return error
+                        } else {
+							GLLine.find({ journalentry: journalentry }).populate('item').exec(function(err, generalledgerlines) {
+								if(!generalledgerlines) {
+									res.json({success: false, message: 'No GL lines'});
+								} else {
+									generalledgerlines.forEach(function(glline) {
+										journalentry.generalledgerlines.push(glline);
+									});
+									console.log(journalentry);
+		                            // Save changes
+		                            journalentry.save(function(err) {
+		                                if (err) {
+		                                    console.log(err); // Log any errors to the console
+		                                } else {
+		                                    res.json({ success: true, message: 'Journal Entry has been updated!' }); // Return success message
+		                                }
+		                            });
+								}
+	                        });
+						}
+                    });
+                } else {
+               		res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+                }
+            }
+        });
+    });
+
+	router.post('/addglline',(req, res) => {
+		var glline = new GLLine();
+		glline.chapter = req.body.chapter;
+		glline.creditamt = req.body.creditamt;
+		glline.date = req.body.date;
+		glline.debitamt = req.body.debitamt;
+		glline.glacct = req.body.glacct;
+		glline.journal = req.body.journal;
+		glline.transactionsource = req.body.transactionsource;
+		glline.postingperiod = req.body.postingperiod;
+		
+		if( 
+			//*!! FIX Joural Link
+			//req.body.journal == null || req.body.journal == '' ||
+			req.body.chapter == null || req.body.chapter == '' ||
+			req.body.date == null || req.body.date == '' ||
+			req.body.glacct == null || req.body.glacct == '' ||
+			req.body.postingperiod == null || req.body.postingperiod == '' ||
+			req.body.transactionsource == null || req.body.transactionsource == ''
+		) {
+			res.json({success: false, message:'Ensure all mandatory fields for a GL line are provided'})
+		}
+		else { 
+			glline.save(function(err){
+				if (err) {
+					if (err.errors != null) {
+						if (err.errors.chapter) {
+							res.json({success: false, message: err.errors.chapter.message});
+						} else if (err.errors.date) {
+							res.json({success: false, message: err.errors.date.message});
+						} else if (err.errors.glacct) {
+							res.json({success: false, message: err.errors.glacct.message});
+						} else if (err.errors.postingperiod) {
+							res.json({success: false, message: err.errors.postingperiod.message});
+						} else if (err.errors.transactionsource) {
+							res.json({success: false, message: err.errors.transactionsource.message});
+						} else {
+							res.json({success: false, message: err});
+						}
+					} else if(err) {
+						console.log(err);
+						res.json({success: false, message: err.errmsg});
+					}
+				}
+				else {
+					res.json({success: true, glline:glline, message: 'GL line created!'});
+				}
+			});
+		}
+	});
+
+	router.get('/getgllines/:id', function(req, res) {
+		var journal = req.params.id;
+
+		console.log(req.params.id);
+
+		GLLine.find({journal: journal }).populate('journal chapter glacct transactionsource').exec(function(err, gllines) {
+		//Invoice.find({}).exec(function(err, invoices) {
+			if (err) throw err; // Throw error if cannot connect
+
+			User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+				if (err) throw err;
+				if(!mainUser) {
+					res.json({success: false, message: 'No user found'});
+				} else {
+
+					if (mainUser.permission === 'admin' || mainUser.permission == 'moderator') {
+						if(!gllines) {
+							res.json({success: false, message: 'No GL lines found'});
+						} else {
+							res.json({success: true, gllines: gllines, permission: mainUser.permission});
+				
+						}
+					} else {
+						res.json({success: false, message: 'Insufficient Permissions'});
+					}
+				}
+			});
+		});
+	});
+
+
+router.delete('/deleteglline/:id', function(req, res) {
+		var deletedGLLine = req.params.id;
+
+		User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+			if (err) throw err;
+			if (!mainUser) {
+				res.json({success: false, message: 'No user found'});
+			} else {
+				if (mainUser.permission != 'admin') {
+					res.json({success: false, message: 'Insufficient Permissions'});
+				} else {
+					GLLine.findOneAndRemove({ _id: deletedGLLine }, function(err, user) {
+						if(err) throw err;
+						res.json({success: true});
+					});
+				}
+			}
+		});
+	});
+
+
+    router.get('/editglline/:id', function(req, res) {
+        var editGLLine = req.params.id; // Assign the _id from parameters to variable
+
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw error if cannot connect
+            // Check if logged in user was found in database
+            if (!mainUser) {
+                res.json({ success: false, message: 'No user found' }); // Return error
+            } else {
+                // Check if logged in user has editing privileges
+                if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+                    // Find the user to be editted
+                    GLLine.findOne({ _id: editGLLine }).populate('journal chapter glacct transactionsource').exec(function(err, glline) {
+                        if (err) throw err; // Throw error if cannot connect
+                        // Check if user to edit is in database
+                        if (!glline) {
+                            res.json({ success: false, message: 'No GL Line found' }); // Return error
+                        } else {
+                            res.json({ success: true, glline: glline }); // Return the user to be editted
                         }
                     });
                 } else {

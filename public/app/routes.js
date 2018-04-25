@@ -293,6 +293,14 @@ var app = angular.module('appRoutes',['ngRoute'])
         permission: ['admin', 'moderator']
     })
 
+	.when('/transactions/payment/', {
+        templateUrl: 'app/views/pages/transactions/payment.html',
+        controller: 'paymentCtrl',
+        controllerAs: 'payment',
+        authenticated: true,
+        permission: ['admin', 'moderator']
+    })
+
 	.otherwise({ redirectTo: '/'});
 
 	$locationProvider.html5Mode({
