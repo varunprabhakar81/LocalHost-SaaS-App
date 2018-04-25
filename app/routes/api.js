@@ -1695,8 +1695,6 @@ module.exports = function(router) {
 	router.get('/getinvoicelines/:id', function(req, res) {
 		var invoice = req.params.id;
 
-		console.log(req.params.id);
-
 		InvoiceLine.find({invoice: invoice }).populate('invoice item').exec(function(err, invoicelines) {
 		//Invoice.find({}).exec(function(err, invoices) {
 			if (err) throw err; // Throw error if cannot connect
@@ -1868,7 +1866,7 @@ router.delete('/deleteinvoiceline/:id', function(req, res) {
 					res.json({success: false, message: 'No user found'});
 				} else {
 					if (mainUser.permission === 'admin' || mainUser.permission == 'moderator') {
-						if(!journalentrys) {
+						if(!journalentries) {
 							res.json({success: false, message: 'No Journal Entries found'});
 						} else {
 							res.json({success: true, journalentries: journalentries, permission: mainUser.permission});
@@ -1934,10 +1932,14 @@ router.delete('/deleteinvoiceline/:id', function(req, res) {
     });
 
 
- 	// Route to update/edit a journalentry
-    router.put('/journalentrylinklines', function(req, res) {
+    router.put('/journalentrylinkgllines', function(req, res) {
+
         var editJournalEntry = req.body._id;
         var newJournalEntryData = req.body;
+
+        console.log(editJournalEntry);
+
+        console.log(newJournalEntryData);
 
         User.findOne({ username: req.decoded.username }, function(err, mainUser) {
             if (err) throw err; // Throw err if cannot connnect
@@ -1952,14 +1954,13 @@ router.delete('/deleteinvoiceline/:id', function(req, res) {
                         if (!journalentry) {
                                 res.json({ success: false, message: 'No Journal Entry found' }); // Return error
                         } else {
-							GLLine.find({ journalentry: journalentry }).populate('item').exec(function(err, generalledgerlines) {
+							GLLine.find({ journal: journalentry }).populate('glacct chapter').exec(function(err, generalledgerlines) {
 								if(!generalledgerlines) {
 									res.json({success: false, message: 'No GL lines'});
 								} else {
 									generalledgerlines.forEach(function(glline) {
-										journalentry.generalledgerlines.push(glline);
+										journalentry.gllines.push(glline);
 									});
-									console.log(journalentry);
 		                            // Save changes
 		                            journalentry.save(function(err) {
 		                                if (err) {

@@ -1,6 +1,7 @@
 angular.module('invoiceController', ['memberController', 'chapterController', 'glaccountController', 'itemController','configServices', 'journalentryServices'])
 
-.controller('invoiceCtrl', function(Member, Chapter, GLAccount, Item, Invoice, InvoiceLine, $timeout, $location, $scope, $routeParams, Config, JournalEntry) {
+.controller('invoiceCtrl', function(Member, Chapter, GLAccount, Item, Invoice, InvoiceLine, $timeout, $location, 
+    $scope, $routeParams, Config, JournalEntry, GLLine) {
 	var app = this;
     app.enableedit = false;
 
@@ -276,21 +277,22 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
             app.successMsg = false;
             app.loading = true;
 
-            var newline = {};
-
-            newline.chapter = journal.chapter;
-            newline.date = journal.date;
-            newline.journal = journal;
-            newline.postingperiod = journal.postingperiod;
-            newline.transactionsource = invoice;
-
             //Create Credit Lines
             if(invoicelines.length != 0 && invoicelines[0].item !='') {
                 angular.forEach(invoicelines, function(invoiceline){
+                    var newline = {};
+
+                    newline.chapter = journal.chapter;
+                    newline.date = journal.date;
+                    newline.journal = journal;
+                    newline.postingperiod = journal.postingperiod;
+                    newline.transactionsource = invoice;
+
                     
                     newline.glacct = invoiceline.item.incomeacct;
                     newline.creditamt = invoiceline.amount;
                     newline.debitamt = 0;
+
 
 
                     GLLine.addGLLine(newline).then(function(data) {
@@ -314,10 +316,18 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
                     });
                 });
 
+                var newline = {};
+                newline.chapter = journal.chapter;
+                    newline.date = journal.date;
+                    newline.journal = journal;
+                    newline.postingperiod = journal.postingperiod;
+                    newline.transactionsource = invoice;
+
+
                 //Create Debit Line
                 newline.glacct = invoice.aracct;
                 newline.debitamt = invoice.amountdue;
-                newline.debitamt = 0;
+                newline.creditamt = 0;
 
                 GLLine.addGLLine(newline).then(function(data) {
                     if(data.data.success){
@@ -357,11 +367,9 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
             app.successMsg = false;
             app.loading = true;
 
-            console.log(invoiceData);
-
-            JournalEntryData.chapter = invoiceData.invoice.chapter;
-            JournalEntryData.date = invoiceData.invoice.invoicedate;
-            JournalEntryData.postingperiod = invoiceData.invoice.postingperiod;
+            JournalEntryData.chapter = invoiceData.chapter;
+            JournalEntryData.date = invoiceData.invoicedate;
+            JournalEntryData.postingperiod = invoiceData.postingperiod;
 
 
             JournalEntry.addJournalEntry(JournalEntryData).then(function(data) {
@@ -373,7 +381,7 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
 
                         JournalEntryData._id = data.data.journalentry._id;
 
-                        Invoice.journalentrylinklines(JournalEntryData).then(function(data) {
+                        JournalEntry.journalentrylinkgllines(JournalEntryData).then(function(data) {
                             // Check if able to edit the user's name
                             if (data.data.success) {
                                 //*!! FIX - Do something on successful link of GL Lines to Journal Entry
@@ -387,7 +395,7 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
 
                         app.loading = false;
                         //Create Success Message
-                        app.successMsg = data.data.message+'...Redirecting';
+                        app.successMsg = 'Invoice & ' + data.data.message + '...Redirecting';
                         //Redirect to Home Message
                         $timeout(function(){
                             $location.path('/reports/invoicereport');
@@ -433,7 +441,7 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
                                 // Check if able to edit the user's name
                                 if (data.data.success) {
                                     //*!! FIX - Do something on successful link of invoice to lines
-                                    var GLPosted = app.createGLPosting(lines, data.data.invoice);
+                                    var GLPosted = app.createGLPosting(invoiceData, lines);
                                 } else {
                                     app.disabled = false;
                                     app.loading = false;
@@ -631,5 +639,4 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
 })
 
 .controller('viewinvoiceCtrl', function($scope, $routeParams, User, Chapter, $timeout, $location) {
-    console.log('gaa haa');
 })

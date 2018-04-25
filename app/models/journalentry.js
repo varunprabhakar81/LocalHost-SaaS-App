@@ -11,5 +11,5 @@ var journalentrySchema = new Schema({
   //transaction: {type: String, lowercase: true, required: true, validate: emailValidator},
 });
 
-module.exports = mongoose.model('JounralEntry', journalentrySchema);
+module.exports = mongoose.model('JournalEntry', journalentrySchema);
 

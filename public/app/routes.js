@@ -301,6 +301,14 @@ var app = angular.module('appRoutes',['ngRoute'])
         permission: ['admin', 'moderator']
     })
 
+	.when('/reports/glreport', {
+		templateUrl: 'app/views/pages/reports/glreport.html',
+		controller: 'glreportCtrl',
+		controllerAs: 'glreport',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
 	.otherwise({ redirectTo: '/'});
 
 	$locationProvider.html5Mode({

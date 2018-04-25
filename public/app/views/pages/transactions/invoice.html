@@ -151,10 +151,8 @@
         <tr>
 
             <td colspan="12">
-                <button ng-show="invoice.create && !invoice.view" type="button" class="btn btn-primary btn-sm" align="right" ng-click="invoice.addNewLine(lines.length);" >Add Line</button>
-                <button ng-show="!invoice.create && invoice.view" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" type="button" class="btn btn-primary btn-sm" align="right" ng-click="invoice.addNewLine(lines.length);" >Add Line</button>
-                 <button ng-show="invoice.create && !invoice.view" type="button" class="btn btn-danger btn-sm" align="right" ng-click="invoice.removeLine();" >Remove Line(s)</button>
-                <button ng-show="!invoice.create && invoice.view" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" type="button" class="btn btn-danger btn-sm" align="right" ng-click="invoice.removeLine();" >Remove Line(s)</button>
+                <button ng-show="(invoice.create && !invoice.view)|| invoice.enableedit" type="button" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" class="btn btn-primary btn-sm" align="right" ng-click="invoice.addNewLine(lines.length);" >Add Line</button>
+                 <button ng-show="(invoice.create && !invoice.view)|| invoice.enableedit" type="button" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" class="btn btn-danger btn-sm" align="right" ng-click="invoice.removeLine();" >Remove Line(s)</button>
             </td>
         </tr>
 
@@ -172,7 +170,7 @@
     <br>
     
     <!-- *! FIX VALID HARD CODE -->
-    <button type="submit" class="btn btn-primary" ng-click="invoice.createInvoice(invoiceData, lines, true)">Create Invoice</button>
+    <button type="submit" class="btn btn-primary" ng-show="invoice.create && !invoice.view" ng-click="invoice.createInvoice(invoiceData, lines, true)">Create Invoice</button>
 
 </form>
 

@@ -333,4 +333,131 @@ angular.module('glaccountController', ['glaccountServices'])
             app.disabled = false; // Enable form for editing
         }
     };
-});
+})
+
+
+.controller('glreportCtrl', function($timeout, $location, $scope, JournalEntry, GLLine) {
+
+    var app = this;
+
+    var i=0;
+    app.gllinestoreport = [];
+    app.credittotal = 0;
+    app.debittotal = 0;
+
+    // Function: get all the chapters from database
+    function getGLLines(journal) {
+        // Runs function to get all the chapters from database
+        GLLine.getGLLines(journal._id).then(function(data) {
+            // Check if able to get data from database
+            if (data.data.success) {
+                // Check which permissions the logged in user has
+                if (data.data.permission === 'admin' || data.data.permission === 'moderator') {
+                    app.gllines = data.data.gllines;
+
+                    angular.forEach(app.gllines, function(glline) {
+                        app.gllinestoreport.push(glline);
+                        app.credittotal += parseFloat(glline.creditamt);
+                        app.debittotal += parseFloat(glline.debitamt);
+                    });
+                    app.loading = false; // Stop loading icon
+                    app.accessDenied = false; // Show table
+
+                    // Check if logged in user is an admin or moderator
+                    if (data.data.permission === 'admin') {
+                        app.editAccess = true; // Show edit button
+                        app.deleteAccess = true; // Show delete button
+                    } else if (data.data.permission === 'moderator') {
+                        app.editAccess = true; // Show edit button
+                    }
+                } else {
+                    app.errorMsg = 'Insufficient Permissions'; // Reject edit and delete options
+                    app.loading = false; // Stop loading icon
+                }
+            } else {
+                app.errorMsg = data.data.message; // Set error message
+                app.loading = false; // Stop loading icon
+            }
+        });
+    }
+
+    function getJournalEntries() {
+        JournalEntry.getJournalEntries().then(function(data) {
+            // Check if able to get data from database
+            if (data.data.success) {
+                // Check which permissions the logged in user has
+                if (data.data.permission === 'admin' || data.data.permission === 'moderator') {
+                    app.journalentries = data.data.journalentries;
+                    angular.forEach(app.journalentries, function(journal) {
+                        getGLLines(journal);
+                    });
+                    app.loading = false; // Stop loading icon
+                    app.accessDenied = false; // Show table
+
+                } else {
+                    app.errorMsg = 'Insufficient Permissions'; // Reject edit and delete options
+                    app.loading = false; // Stop loading icon
+                }
+            } else {
+                app.errorMsg = data.data.message; // Set error message
+                app.loading = false; // Stop loading icon
+            }
+        });
+    }
+
+
+    getJournalEntries();
+
+    // Function: Show all results on page
+    app.showAll = function() {
+        app.limit = undefined; // Clear ng-repeat limit
+        app.showMoreError = false; // Clear error message
+    };
+
+    // Function: Show more results on page
+    app.showMore = function(number) {
+        app.showMoreError = false; // Clear error message
+        // Run function only if a valid number above zero
+        console.log(number);
+
+        if (number > 0) {
+            app.limit = number; // Change ng-repeat filter to number requested by user
+        } else if (number == '') {
+            app.limit = undefined;
+        } else {
+            app.showMoreError = 'Please enter a valid number'; // Return error if number not valid
+        }
+    };
+
+    // Function: Perform a basic search function
+    app.search = function(searchKeyword, number) {
+        // Check if a search keyword was provided
+        if (searchKeyword) {
+            // Check if the search keyword actually exists
+            if (searchKeyword.length > 0) {
+                app.limit = 0; // Reset the limit number while processing
+                $scope.searchFilter = searchKeyword; // Set the search filter to the word provided by the user
+                app.limit = number; // Set the number displayed to the number entered by the user
+            } else {
+                $scope.searchFilter = undefined; // Remove any keywords from filter
+                app.limit = 0; // Reset search limit
+            }
+        } else {
+            $scope.searchFilter = undefined; // Reset search limit
+            app.limit = undefined; // Set search limit to zero
+        }
+    };
+
+    // Function: Clear all fields
+    app.clear = function() {
+        $scope.number = undefined; // Set the filter box to 'Clear'
+        app.limit = undefined; // Clear all results
+        $scope.searchKeyword = undefined; // Clear the search word
+        $scope.searchFilter = undefined; // Clear the search filter
+        app.showMoreError = false; // Clear any errors
+        $scope.advancedSearchFilter = {};
+        $scope.searchByUsername = undefined;
+        $scope.searchByEmail = undefined;
+        $scope.searchByName = undefined;
+    };
+})
