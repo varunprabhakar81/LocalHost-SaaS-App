@@ -7,6 +7,7 @@ var Invoice = require('../models/invoice')
 var InvoiceLine = require('../models/invoiceline')
 var JournalEntry = require('../models/journalentry')
 var GLLine = require('../models/glline')
+var PostingPeriod = require('../models/postingperiod')
 var jwt = require('jsonwebtoken');
 var secret = 'harryporter';
 var nodemailer = require('nodemailer');
@@ -738,7 +739,6 @@ module.exports = function(router) {
 	//Chapter Post Route
 	router.post('/addchapter',(req, res) => {
 		var chapter = new Chapter();
-				console.log('account add');
 		chapter.chaptername = req.body.chaptername;
 		chapter.website = req.body.website;
 	
@@ -893,9 +893,13 @@ module.exports = function(router) {
 		var member = new Member();
 		member.membername = req.body.membername;
 		member.email = req.body.email;
+		member.aracct = req.body.aracct;
+		member.invoiceterms = req.body.invoiceterms;
+		member.chapters = req.body.chapters;
+		
 	
-		if(req.body.membername == null || req.body.membername == '' || req.body.email == null || req.body.email == ''){
-			res.json({success: false, message:'Ensure Member Name and Website are provided'})
+		if(req.body.membername == null || req.body.membername == '' || req.body.email == null || req.body.email == '' || req.body.chapters == null || req.body.chapters == ''){
+			res.json({success: false, message:'Ensure Member Name and Email are provided'})
 		}
 		else { 
 			member.save(function(err){
@@ -905,6 +909,12 @@ module.exports = function(router) {
 						res.json({success: false, message: err.errors.membername.message});
 						} else if (err.errors.email) {
 							res.json({success: false, message: err.errors.email.message});
+						} else if (err.errors.aracct) {
+							res.json({success: false, message: err.errors.aracct.message});
+						} else if (err.errors.invoiceterms) {
+							res.json({success: false, message: err.errors.invoiceterms.message});
+						} else if (err.errors.chapters) {
+							res.json({success: false, message: err.errors.chapters.message});
 						} else {
 							res.json({success: false, message: err});
 						}
@@ -923,7 +933,7 @@ module.exports = function(router) {
 	});
 
 	router.get('/getmembers/', function(req, res) {
-		Member.find({}, function(err, members) {
+		Member.find({}).populate('aracct chapters').exec(function(err, members) {
 			if (err) throw err; // Throw error if cannot connect
 
 			User.findOne({ username: req.decoded.username }, function(err, mainUser) {
@@ -980,7 +990,7 @@ module.exports = function(router) {
                 // Check if logged in user has editing privileges
                 if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
                     // Find the user to be editted
-                    Member.findOne({ _id: editMember }, function(err, member) {
+                    Member.findOne({ _id: editMember }).populate('aracct chapters').exec(function(err, member) {
                         if (err) throw err; // Throw error if cannot connect
                         // Check if user to edit is in database
                         if (!member) {
@@ -1000,8 +1010,13 @@ module.exports = function(router) {
  	// Route to update/edit a member
     router.put('/editmember', function(req, res) {
         var editMember = req.body._id;
+
         if (req.body.membername) var newMemberName = req.body.membername;
         if (req.body.email) var newEmail = req.body.email;
+        if (req.body.aracct) var newAracct = req.body.aracct;
+        if (req.body.invoiceterms) var newInvoiceterms = req.body.invoiceterms;
+        if (req.body.chapters) var newChapters = req.body.chapters;
+
 
         User.findOne({ username: req.decoded.username }, function(err, mainUser) {
             if (err) throw err; // Throw err if cannot connnect
@@ -1009,54 +1024,44 @@ module.exports = function(router) {
             if (!mainUser) {
                 res.json({ success: false, message: "no user found" }); // Return erro
             } else {
-                if (newMemberName) {
-                    // Check if person making changes has appropriate access
-                    if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
-						Member.findOne({ _id: editMember }, function(err, member) {
-                            if (err) throw err; // Throw error if cannot connect
-                            if (!member) {
-                                res.json({ success: false, message: 'No member found' }); // Return error
-                            } else {
+            	if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+            		Member.findOne({ _id: editMember }).populate('aracct').exec(function(err, member){
+						if (err) throw err; // Throw error if cannot connect
+                        if (!member) {
+                                res.json({ success: false, message: 'No Member found' }); // Return error
+                        } else {
+                        	if (newMemberName) {
                                 member.membername = newMemberName; // Assign new name to user in database
-                                // Save changes
-                                member.save(function(err) {
-                                    if (err) {
-                                        console.log(err); // Log any errors to the console
-                                    } else {
-                                        res.json({ success: true, message: 'Member Name has been updated!' }); // Return success message
-                                    }
-                                });
                             }
-                        });
-                    } else {
-                        res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
-                    }
-                }
 
-                if (newEmail) {
-                    // Check if person making changes has appropriate access
-                    if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
-                        // Look for user in database
-                        Member.findOne({ _id: editMember }, function(err, member) {
-                            if (err) throw err; // Throw error if cannot connect
-                            // Check if member is in database
-                            if (!member) {
-                                res.json({ success: false, message: 'No user found' }); // Return error
-                            } else {
-                                member.email = newEmail;
-                                // Save changes
-                                member.save(function(err) {
-                                    if (err) {
-                                        console.log(err); // Log error to console
-                                    } else {
-                                        res.json({ success: true, message: 'Email has been updated' }); // Return success
-                                    }
-                                });
+                            if (newEmail) {
+                            	member.email= newEmail;
                             }
-                        });
-                    } else {
+
+                            if (newAracct) {
+                            	member.aracct= newAracct;
+                            }
+
+                            if (newInvoiceTerms) {
+                            	member.invoiceterms = newInvoiceterms;
+                            }
+
+                            if (newChapters) {
+                            	member.chapters = newChapters;
+                            }
+                            
+                            // Save changes
+                            member.save(function(err) {
+                                if (err) {
+                                    console.log(err); // Log any errors to the console
+                                } else {
+                                    res.json({ success: true, message: 'Member info has been updated!' }); // Return success message
+                                }
+                            });
+                        }
+                    });
+                } else {
                         res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
-                    }
                 }
             }
         });
@@ -1298,6 +1303,7 @@ module.exports = function(router) {
 		var item = new Item();
 		item.itemname = req.body.itemname;
 		item.incomeacct = req.body.incomeacct;
+		item.rate = req.body.rate;
 	
 		if(req.body.itemname == null || req.body.itemname == '' || req.body.incomeacct == null || req.body.incomeacct == ''){
 			res.json({success: false, message:'Ensure all Item mandatory fields are provided'})
@@ -1310,6 +1316,8 @@ module.exports = function(router) {
 						res.json({success: false, message: err.errors.itemname.message});
 						} else if (err.errors.incomeacct) {
 						res.json({success: false, message: err.errors.incomeacct.message});
+						} else if (err.errors.rate) {
+						res.json({success: false, message: err.errors.rate.message});
 						} else {
 							res.json({success: false, message: err});
 						}
@@ -1405,9 +1413,11 @@ module.exports = function(router) {
 
  	// Route to update/edit a item
     router.put('/edititem', function(req, res) {
+    	console.log(req.body);
         var editItem = req.body._id;
         if (req.body.itemname) var newItemName = req.body.itemname;
         if (req.body.incomeacct) var newIncomeAcct= req.body.incomeacct;
+        if (req.body.rate) var newRate= req.body.rate;
 
 
         User.findOne({ username: req.decoded.username }, function(err, mainUser) {
@@ -1428,6 +1438,10 @@ module.exports = function(router) {
 
                             if (newIncomeAcct) {
                             	item.incomeacct= newIncomeAcct;
+                            }
+
+                            if (newRate) {
+                            	item.rate = newRate;
                             }
                                 // Save changes
                                 item.save(function(err) {
@@ -1458,11 +1472,12 @@ module.exports = function(router) {
 		invoice.chapter = req.body.chapter;
 		invoice.invoicedate = req.body.invoicedate;
 		invoice.invoiceduedate = req.body.invoiceduedate;
+		invoice.invoiceterms = req.body.invoiceterms;
 
-		//*! FIX 
-		if(req.body.invoiceterms != null && req.body.invoiceterms !='') {
-			invoice.invoiceterms = req.body.invoiceterms.days;
-		}
+		// //*! FIX 
+		// if(req.body.invoiceterms != null && req.body.invoiceterms !='') {
+		// 	invoice.invoiceterms = req.body.invoiceterms.days;
+		// }
 		
 
 		invoice.member = req.body.member;
@@ -1508,8 +1523,8 @@ module.exports = function(router) {
 							res.json({success: false, message: err.errors.member.message});
 						} else if (err.errors.postingperiod) {
 							res.json({success: false, message: err.errors.postingperiod.message});
-						} else {
-							res.json({success: false, message: err});
+						} else if (err.errors.postingperiod) {
+							res.json({success: false, message: err.errors.postingperiod.message});
 						}
 					} else if(err) {
 						console.log(err);
@@ -1524,7 +1539,7 @@ module.exports = function(router) {
 	});
 
 	router.get('/getinvoices/', function(req, res) {
-		Invoice.find({}).populate('aracct chapter member lines').exec(function(err, invoices) {
+		Invoice.find({}).populate('aracct chapter member lines postingperiod').exec(function(err, invoices) {
 		//Invoice.find({}).exec(function(err, invoices) {
 			if (err) throw err; // Throw error if cannot connect
 
@@ -1584,7 +1599,7 @@ module.exports = function(router) {
                 // Check if logged in user has editing privileges
                 if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
                     // Find the user to be editted
-                    Invoice.findOne({ _id: editInvoice }).populate('aracct chapter member lines').exec(function(err, invoice) {
+                    Invoice.findOne({ _id: editInvoice }).populate('aracct chapter member lines postingperiod').exec(function(err, invoice) {
                         if (err) throw err; // Throw error if cannot connect
                         // Check if user to edit is in database
                         if (!invoice) {
@@ -1626,7 +1641,6 @@ module.exports = function(router) {
 									invoicelines.forEach(function(line) {
 										invoice.lines.push(line);
 									});
-									console.log(invoice);
 		                            // Save changes
 		                            invoice.save(function(err) {
 		                                if (err) {
@@ -1937,10 +1951,6 @@ router.delete('/deleteinvoiceline/:id', function(req, res) {
         var editJournalEntry = req.body._id;
         var newJournalEntryData = req.body;
 
-        console.log(editJournalEntry);
-
-        console.log(newJournalEntryData);
-
         User.findOne({ username: req.decoded.username }, function(err, mainUser) {
             if (err) throw err; // Throw err if cannot connnect
             // Check if logged in user is found in database
@@ -2034,9 +2044,7 @@ router.delete('/deleteinvoiceline/:id', function(req, res) {
 	router.get('/getgllines/:id', function(req, res) {
 		var journal = req.params.id;
 
-		console.log(req.params.id);
-
-		GLLine.find({journal: journal }).populate('journal chapter glacct transactionsource').exec(function(err, gllines) {
+		GLLine.find({journal: journal }).populate('journal chapter glacct transactionsource postingperiod').exec(function(err, gllines) {
 		//Invoice.find({}).exec(function(err, invoices) {
 			if (err) throw err; // Throw error if cannot connect
 
@@ -2095,7 +2103,7 @@ router.delete('/deleteglline/:id', function(req, res) {
                 // Check if logged in user has editing privileges
                 if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
                     // Find the user to be editted
-                    GLLine.findOne({ _id: editGLLine }).populate('journal chapter glacct transactionsource').exec(function(err, glline) {
+                    GLLine.findOne({ _id: editGLLine }).populate('journal chapter glacct transactionsource postingperiod').exec(function(err, glline) {
                         if (err) throw err; // Throw error if cannot connect
                         // Check if user to edit is in database
                         if (!glline) {
@@ -2155,6 +2163,184 @@ router.delete('/deleteglline/:id', function(req, res) {
   //       });
   //   });
 
+
+	router.post('/addpostingperiod',(req, res) => {
+		var postingperiod = new PostingPeriod();
+		postingperiod.month = req.body.month;
+		postingperiod.year = req.body.year;
+		postingperiod.status = req.body.status;
+
+
+		if(req.body.month == null || req.body.month == '' || req.body.year == null || req.body.year == '' || req.body.status == null || req.body.status == ''){
+			res.json({success: false, message:'Ensure all mandatory fields for Posting Period are provided'})
+		}
+		else { 
+			postingperiod.save(function(err){
+				if (err) {
+					if (err.errors != null) {
+						if (err.errors.month) {
+						res.json({success: false, message: err.errors.month.message});
+						} else if (err.errors.year) {
+						res.json({success: false, message: err.errors.year.message});
+						} else if (err.errors.status) {
+						res.json({success: false, message: err.errors.status.message});
+						} else {
+							res.json({success: false, message: err});
+						}
+					} 
+					else if(err) {
+						console.log(err);
+						if (err.code == 11000) {
+							if (err.errmsg[7] == 'd' && err.errmsg[8] == 'u' && err.errmsg[9] == 'p') {
+							 	res.json({success: false, message: 'Posting Year and Month Already Exist'});
+							}
+						} else {
+							res.json({success: false, message: err.errmsg});
+						}
+
+					}
+
+				}
+				else {
+					console.log(err);
+					res.json({success: true, message: 'Posting Period created!'});
+				}
+			});
+		}
+	});
+
+	router.get('/getpostingperiods/:status', function(req, res) {
+		var postingperiodstatus;
+
+		if(req.params.status == 'Open') {
+			postingperiodstatus = 'Open';
+		} else if(req.params.status == 'Close') {
+			postingperiodstatus = 'Close';
+		} else {
+			postingperiodstatus = ['Open', 'Close'];
+		}
+
+		PostingPeriod.find({status: postingperiodstatus}).sort( { month: 1 } ).exec(function(err, postingperiods) {
+			if (err) throw err; // Throw error if cannot connect
+
+			User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+				if (err) throw err;
+				if(!mainUser) {
+					res.json({success: false, message: 'No user found'});
+				} else {
+
+					if (mainUser.permission === 'admin' || mainUser.permission == 'moderator') {
+						if(!postingperiods) {
+							res.json({success: false, message: 'No Posting Periods found'});
+						} else {
+							res.json({success: true, postingperiods: postingperiods, permission: mainUser.permission});
+				
+						}
+					} else {
+						res.json({success: false, message: 'Insufficient Permissions'});
+					}
+				}
+			});
+		});
+	});
+
+
+	router.delete('/deletepostingperiod/:id', function(req, res) {
+		var deletedPostingPeriod = req.params.id;
+
+		User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+			if (err) throw err;
+			if (!mainUser) {
+				res.json({success: false, message: 'No user found'});
+			} else {
+				if (mainUser.permission != 'admin') {
+					res.json({success: false, message: 'Insufficient Permissions'});
+				} else {
+					PostingPeriod.findOneAndRemove({ _id: deletedPostingPeriod }, function(err, user) {
+						if(err) throw err;
+						res.json({success: true});
+					});
+				}
+			}
+		});
+	});
+
+
+    // Route to get the postingperiod that needs to be edited
+    router.get('/editpostingperiod/:id', function(req, res) {
+        var editPostingPeriod = req.params.id; // Assign the _id from parameters to variable
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw error if cannot connect
+            // Check if logged in user was found in database
+            if (!mainUser) {
+                res.json({ success: false, message: 'No user found' }); // Return error
+            } else {
+                // Check if logged in user has editing privileges
+                if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+                    // Find the user to be editted
+                    PostingPeriod.findOne({ _id: editPostingPeriod }).exec(function(err, postingperiod) {
+                        if (err) throw err; // Throw error if cannot connect
+                        if (!postingperiod) {
+                            res.json({ success: false, message: 'No Posting Period found' }); // Return error
+                        } else {
+                            res.json({ success: true, postingperiod: postingperiod }); // Return the user to be editted
+                        }
+                    });
+                } else {
+                    res.json({ success: false, message: 'Insufficient Permissions' }); // Return access error
+                }
+            }
+        });
+    });
+
+
+ 	// Route to update/edit a postingperiod
+    router.put('/editpostingperiod', function(req, res) {
+        var editPostingPeriod = req.body._id;
+        if (req.body.year) var newPostingPeriodYear = req.body.year;
+        if (req.body.month) var newPostingPeriodMonth = req.body.month;
+        if (req.body.status) var newPostingPeriodStatus = req.body.status;
+
+
+        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+            if (err) throw err; // Throw err if cannot connnect
+            // Check if logged in user is found in database
+            if (!mainUser) {
+                res.json({ success: false, message: "no user found" }); // Return erro
+            } else {
+            	if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+					PostingPeriod.findOne({ _id: editPostingPeriod }).exec(function(err, postingperiod) {
+						if (err) throw err; // Throw error if cannot connect
+                        if (!postingperiod) {
+                                res.json({ success: false, message: 'No Posting Period found' }); // Return error
+                        } else {
+                        	if (newPostingPeriodYear) {
+                                postingperiod.year = newPostingPeriodYear; // Assign new name to user in database
+                            }
+
+                            if (newPostingPeriodMonth) {
+                            	postingperiod.month= newPostingPeriodMonth;
+                            }
+
+                            if (newPostingPeriodStatus) {
+                            	postingperiod.status= newPostingPeriodStatus;
+                            }
+                            // Save changes
+                            postingperiod.save(function(err) {
+                                if (err) {
+                                    console.log(err); // Log any errors to the console
+                                } else {
+                                    res.json({ success: true, message: 'Posting Period info has been updated!' }); // Return success message
+                                }
+                            });
+                        }
+                    });
+                } else {
+                        res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+                }
+            }
+        });
+    });
 
 	// router.post('/testrelationships',(req, res) => {
 

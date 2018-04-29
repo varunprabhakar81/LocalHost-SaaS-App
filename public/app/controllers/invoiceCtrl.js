@@ -1,7 +1,7 @@
 angular.module('invoiceController', ['memberController', 'chapterController', 'glaccountController', 'itemController','configServices', 'journalentryServices'])
 
 .controller('invoiceCtrl', function(Member, Chapter, GLAccount, Item, Invoice, InvoiceLine, $timeout, $location, 
-    $scope, $routeParams, Config, JournalEntry, GLLine) {
+    $scope, $routeParams, Config, JournalEntry, GLLine, PostingPeriod) {
 	var app = this;
     app.enableedit = false;
 
@@ -11,10 +11,6 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
         app.create = true;
         $scope.invoiceData = {};
         $scope.invoiceData.billingemail = undefined;
-
-        $scope.invoiceData.invoicedate = new Date();
-        $scope.invoiceData.invoiceduedate = new Date();
-        app.invoiceTerms = Config.invoiceTerms;
 
         $scope.lines = [
         {
@@ -130,13 +126,64 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
             });
         }
 
+        // Function: get all the Open Posting Periods from database
+        function getPostingPeriods() {
+            PostingPeriod.getPostingPeriods('Open').then(function(data) {
+                // Check if able to get data from database
+                if (data.data.success) {
+                    // Check which permissions the logged in user has
+                    if (data.data.permission === 'admin' || data.data.permission === 'moderator') {
+                        app.postingperiods = data.data.postingperiods; // Assign postingperiods from database to variable
+
+                        var month = $scope.invoiceData.invoicedate.getMonth();
+
+                        var postingperiodInvoiceDate = app.postingperiods.find(o => o.month.id === month);
+
+                        $scope.invoiceData.postingperiod = postingperiodInvoiceDate;
+
+                        app.loading = false; // Stop loading icon
+                        app.accessDenied = false; // Show table
+
+                        // Check if logged in user is an admin or moderator
+                        if (data.data.permission === 'admin') {
+                            app.editAccess = true; // Show edit button
+                            app.deleteAccess = true; // Show delete button
+                        } else if (data.data.permission === 'moderator') {
+                            app.editAccess = true; // Show edit button
+                        }
+                    } else {
+                        app.errorMsg = 'Insufficient Permissions'; // Reject edit and delete options
+                        app.loading = false; // Stop loading icon
+                    }
+                } else {
+                    app.errorMsg = data.data.message; // Set error message
+                    app.loading = false; // Stop loading icon
+                }
+            });
+        }
 
         getChapters(); // Invoke function to get chapters from databases
-        getMembers();
-        getItems(); // Invoke function to get items from databases
 
-        app.copyBillingEmail = function(member) {
+        app.loadListValues = function() {
+            getMembers();
+            getItems(); // Invoke function to get items from databases
+            getPostingPeriods();
+
+            $scope.invoiceData.invoicedate = new Date();
+            $scope.invoiceData.invoiceduedate = new Date();
+            app.invoiceterms = Config.invoiceterms;
+        };
+
+
+
+        app.defaultMemberInfo = function(member) {
             $scope.invoiceData.billingemail = member.email;
+            $scope.invoiceData.aracct = member.aracct;
+            
+            if(member.invoiceterms) {
+                $scope.invoiceData.invoiceterms = member.invoiceterms;
+                app.calcInvoiceDueDate($scope.invoiceData);
+            }
         };
 
         app.calcInvoiceDueDate = function(invoiceData) {
@@ -150,9 +197,15 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
                 invoiceData.invoiceduedate = duedate;
                 
                 //*!!NEEDS TO BE FIXED
-                invoiceData.postingperiod= '04-2018';
+                // invoiceData.postingperiod= '04-2018';
             }
 
+        };
+
+        app.defaultRate = function(line) {
+
+            line.rate = line.item.rate;
+            
         };
 
         app.calcLineAmount = function(line) {
@@ -538,7 +591,7 @@ angular.module('invoiceController', ['memberController', 'chapterController', 'g
 
     // $scope.invoiceData.invoicedate = new Date();
     // $scope.invoiceData.invoiceduedate = new Date();
-    // app.invoiceTerms = Config.invoiceTerms;
+    // app.invoiceterms = Config.invoiceterms;
 
     // $scope.lines = [
     // {

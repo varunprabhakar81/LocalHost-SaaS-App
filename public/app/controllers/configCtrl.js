@@ -2,6 +2,6 @@ angular.module('configController', ['configServices'])
 
 .controller('configCtrl', function(Config) {
 
-	//console.log(Config.invoiceTerms);
+	//console.log(Config.invoiceterms);
 	
 });

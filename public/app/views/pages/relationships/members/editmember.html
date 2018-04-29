@@ -1,4 +1,4 @@
-<div class  "page-header" > 
+<!-- <div class  "page-header" > 
     <h1>Edit Member</h1>
 </div>
 
@@ -13,44 +13,141 @@
 
 
 
-<!-- Phase One: Name -->
+
 <form name="editMember.membernameForm" ng-show="editMember.phase1" ng-submit="editMember.updateMemberName(newMemberName, editMember.membernameForm.membername.$valid)" novalidate>
-    <!-- Name Div -->
+
     <div ng-class="{ 'has-success':(editMember.membernameForm.membername.$valid && !editMember.membernameForm.membername.$pristine), 'has-error':(!editMember.membernameForm.membername.$valid && !editMember.membernameForm.membername.$pristine) || (!membernameForm.membername.$valid && membernameForm.$submitted) }">
-        <!-- Name Input -->
+
         <label>Member Name:</label>
         <input ng-disabled="editMember.disabled" class="form-control" type="text" name="membername" placeholder="please enter member name" ng-model="newMemberName" ng-pattern="/^[a-zA-Z\d\-_\s]+$/" required>
-        <!-- Name Validation -->
+
         <p class="help-block" ng-show="(!editMember.membernameForm.membername.$pristine && membernameForm.membername.$error.required) || (editMember.membernameForm.$submitted && editMember.membernameForm.membername.$error.required)">This field is required</p>
         <ul ng-show="(!editMember.membernameForm.membername.$pristine && editMember.membernameForm.membername.$error.pattern)" class="help-block">
             <li> Must not contain any special characters</li>
         </ul>
     </div>
-    <!-- Name Input -->
+
     <br>
-    <!-- Submit Button -->
+
     <button ng-disabled="editMember.disabled" class="btn btn-primary" type="submit">Update</button>
 </form>
-<!-- Phase One: Name -->
 
 
-<!-- Phase One: Name -->
+
+
 <form name="editMember.emailForm" ng-show="editMember.phase2" ng-submit="editMember.updateEmail(newEmail, editMember.emailForm.email.$valid)" novalidate>
-    <!-- Name Div -->
+
     <div ng-class="{ 'has-success':(editMember.emailForm.email.$valid && !editMember.emailForm.email.$pristine), 'has-error':(!editMember.emailForm.email.$valid && !editMember.emailForm.email.$pristine) || (!emailForm.email.$valid && emailForm.$submitted) }">
-        <!-- Name Input -->
+
         <label>Member Email:</label>
         <input ng-disabled="editMember.disabled" class="form-control" type="text" name="email" placeholder="please enter member email" ng-model="newEmail" ng-pattern="/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/" required>
-        <!-- Name Validation -->
+
         <p class="help-block" ng-show="(!editMember.emailForm.email.$pristine && emailForm.email.$error.required) || (editMember.emailForm.$submitted && editMember.emailForm.email.$error.required)">This field is required</p>
         <ul ng-show="(!editMember.emailForm.email.$pristine && editMember.emailForm.email.$error.pattern)" class="help-block">
             <li> Please enter valid email format</li>
         </ul>
     </div>
-    <!-- Name Input -->
+
     <br>
+
+    <button ng-disabled="editMember.disabled" class="btn btn-primary" type="submit">Update</button>
+</form>
+
+<br>
+
+
+<div class="row show-hide-message" ng-show="editMember.successMsg">
+    <div class="alert alert-success">{{ editMember.successMsg }}</div>
+</div>
+
+
+<br>
+
+
+<div class="row show-hide-message" ng-show="editMember.errorMsg">
+    <div class="alert alert-danger">{{ editMember.errorMsg }}</div>
+</div> -->
+
+
+
+
+
+
+
+
+
+<div class  "page-header" > 
+    <h1>Edit Member</h1>
+</div>
+
+<br>
+
+<nav>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <a class="nav-item nav-link PrimaryInfoTab" ng-click="editMember.PrimaryInfoPhase();" ng-class="PrimaryInfoTab" data-toggle="tab" href="#" role="presentation" aria-controls="PrimaryInfoTab">Primary Information</a>
+    <a class="nav-item nav-link AdditionalInfoTab" ng-click="editMember.AdditionalInfoPhase();" ng-class="AdditionalInfoTab" data-toggle="tab" href="#" role="presentation" aria-controls="AdditionalInfoTab">Additional Information</a>
+  </div>
+</nav>
+
+<!-- Phase One: Name -->
+<form name="editMember.PrimaryInfoForm" ng-show="editMember.phase1" ng-submit="editMember.updatePrimaryInfo(newPrimaryInfo, editMember.PrimaryInfoForm.$valid)" novalidate>
+    <!-- Name Div -->
+    <div ng-class="{ 'has-success':(editMember.PrimaryInfoForm.membername.$valid && !editMember.PrimaryInfoForm.membername.$pristine), 'has-error':(!editMember.PrimaryInfoForm.membername.$valid && !editMember.PrimaryInfoForm.membername.$pristine) || (!PrimaryInfoForm.membername.$valid && PrimaryInfoForm.$submitted) }">
+        <!-- Name Input -->
+        <label>Member Name:</label>
+        <input ng-disabled="editMember.disabled" class="form-control" type="text" name="membername" placeholder="please enter member name" ng-model="newPrimaryInfo.membername" ng-pattern="/^[a-zA-Z\d\-_\s]+$/" required>
+        <!-- Name Validation -->
+        <p class="help-block" ng-show="(!editMember.PrimaryInfoForm.membername.$pristine && PrimaryInfoForm.membername.$error.required) || (editMember.PrimaryInfoForm.$submitted && editMember.PrimaryInfoForm.membername.$error.required)">This field is required</p>
+        <ul ng-show="(!editMember.PrimaryInfoForm.membername.$pristine && editMember.PrimaryInfoForm.membername.$error.pattern)" class="help-block">
+            <li> Must not contain any special characters</li>
+        </ul>
+    </div>
+    <br>
+
+    <div ng-class="{ 'has-success':(editMember.PrimaryInfoForm.email.$valid && !editMember.PrimaryInfoForm.email.$pristine), 'has-error':(!editMember.PrimaryInfoForm.email.$valid && !editMember.PrimaryInfoForm.email.$pristine) || (!PrimaryInfoForm.email.$valid && PrimaryInfoForm.$submitted) }">
+        <!-- Name Input -->
+        <label>Member Email:</label>
+        <input ng-disabled="editMember.disabled" class="form-control" type="text" name="email" placeholder="please enter member email" ng-model="newPrimaryInfo.email" ng-pattern="/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/" required>
+        <!-- Name Validation -->
+        <p class="help-block" ng-show="(!editMember.PrimaryInfoForm.email.$pristine && PrimaryInfoForm.email.$error.required) || (editMember.PrimaryInfoForm.$submitted && editMember.PrimaryInfoForm.email.$error.required)">This field is required</p>
+        <ul ng-show="(!editMember.PrimaryInfoForm.email.$pristine && editMember.PrimaryInfoForm.email.$error.pattern)" class="help-block">
+            <li> Please enter valid email format</li>
+        </ul>
+    </div>
+    <br>
+
+    <div>
+        <label>Accounts Receivable Account:</label>
+
+       <select ng-model="newPrimaryInfo.aracct" name="aracct" ng-options="araccount.glaccountnumber + ' - ' + araccount.glaccountname for araccount in editMember.araccounts track by araccount._id"></select>
+
+        <p class="help-block" ng-show="(!editMember.PrimaryInfoForm.aracct.$pristine && PrimaryInfoForm.aracct.$error.required) || (editMember.PrimaryInfoForm.$submitted && editMember.PrimaryInfoForm.aracct.$error.required)">This field is required</p>
+        <ul ng-show="(!editMember.PrimaryInfoForm.aracct.$pristine && editMember.PrimaryInfoForm.aracct.$error.pattern)" class="help-block">
+            <li> Please enter valid item accounts receivable account format</li>
+        </ul>
+    </div>
+    <br>
+
+    <div>
+        <label>Invoice Terms:</label>
+
+       <select ng-model="newPrimaryInfo.invoiceterms" name="aracct" ng-options="invoiceterms.name + ' - ' + invoiceterms.days for invoiceterms in editMember.invoiceterms track by invoiceterms.name"></select>
+
+        <p class="help-block" ng-show="(!editMember.PrimaryInfoForm.invoiceterms.$pristine && PrimaryInfoForm.invoiceterms.$error.required) || (editMember.PrimaryInfoForm.$submitted && editMember.PrimaryInfoForm.invoiceterms.$error.required)">This field is required</p>
+        <ul ng-show="(!editMember.PrimaryInfoForm.invoiceterms.$pristine && editMember.PrimaryInfoForm.invoiceterms.$error.pattern)" class="help-block">
+            <li> Please enter valid invoice terms format</li>
+        </ul>
+    </div>
+    <br>
+
     <!-- Submit Button -->
     <button ng-disabled="editMember.disabled" class="btn btn-primary" type="submit">Update</button>
+</form>
+
+<form name="editMember.AdditionalInfoForm" ng-show="editMember.phase2" ng-submit="editMember.updateAdditionalInfo(newAdditionalInfo, editMember.AdditionalInfoForm.$valid)" novalidate>
+    <div>Placeholder</div>
+
+    <br>
 </form>
 
 <br>
@@ -68,3 +165,4 @@
     <div class="alert alert-danger">{{ editMember.errorMsg }}</div>
 </div>
 <!-- Custom Error Message -->
+

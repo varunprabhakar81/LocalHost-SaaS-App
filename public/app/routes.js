@@ -309,6 +309,30 @@ var app = angular.module('appRoutes',['ngRoute'])
 		permission: ['admin', 'moderator']
 	})
 
+	.when('/addpostingperiod', {
+		templateUrl: 'app/views/pages/administration/postingperiod/addpostingperiod.html',
+		controller: 'postingperiodCtrl',
+		controllerAs: 'postingperiod',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
+	.when('/managepostingperiods', {
+		templateUrl: 'app/views/pages/administration/postingperiod/managepostingperiods.html',
+		controller: 'postingperiodCtrl',
+		controllerAs: 'postingperiod',
+		authenticated: true,
+		permission: ['admin', 'moderator']
+	})
+
+    .when('/editpostingperiod/:id', {
+        templateUrl: 'app/views/pages/administration/postingperiod/editpostingperiod.html',
+        controller: 'editPostingPeriodCtrl',
+        controllerAs: 'editPostingPeriod',
+        authenticated: true,
+        permission: ['admin', 'moderator']
+    })
+
 	.otherwise({ redirectTo: '/'});
 
 	$locationProvider.html5Mode({

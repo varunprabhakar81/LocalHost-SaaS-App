@@ -18,9 +18,21 @@
 
 	</div>
 
+	<div>
+		<label>Chapter(s):</label>
+
+		<select class="form-control" ng-model="member.memberData.chapters" ng-options="chapters.chaptername for chapters in member.chapters"></select>
+
+		<p class="help-block" ng-show="(!memberAddForm.chapters.$pristine && memberAddForm.chapters.$error.required) || (memberAddForm.$submitted && memberAddForm.chapters.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!memberAddForm.chapters.$pristine && memberAddForm.chapters.$error.pattern)" class="help-block">
+			<li> Please select a valid chapter</li>
+		</ul>
+
+	</div>
+<br>
 	<div class="form-group" ng-class="{'has-error': (!memberAddForm.email.$valid && !memberAddForm.email.$pristine) || (!memberAddForm.email.$valid && memberAddForm.$submitted) , 'has-success': memberAddForm.email.$valid && !memberAddForm.email.$pristine}">
 
-		
 		<label>Email:</label>
 		<input class="form-control" type="text" name="email" placeholder="please enter member email" ng-model="member.memberData.email" ng-pattern="/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/" required>
 		<p class="help-block" ng-show="(!memberAddForm.email.$pristine && memberAddForm.email.$error.required) || (memberAddForm.$submitted && memberAddForm.email.$error.required)" >This field is required</p>
@@ -30,6 +42,37 @@
 			<li> Must not contain any special characters</li>
 			<li> Must be at least 3 characters but no more than 40</li>
 		</ul>
+
+	</div>
+
+	<div>
+		<label>Accounts Receivable Account:</label>
+
+		<select class="form-control" ng-model="member.memberData.aracct" ng-options="araccount.glaccountnumber + ' - ' + araccount.glaccountname for araccount in member.araccounts"></select>
+
+		<p class="help-block" ng-show="(!memberAddForm.aracct.$pristine && memberAddForm.aracct.$error.required) || (memberAddForm.$submitted && memberAddForm.aracct.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!memberAddForm.aracct.$pristine && memberAddForm.aracct.$error.pattern)" class="help-block">
+			<li> Please select valid accounts receivable account</li>
+		</ul>
+
+	</div>
+
+	<br>
+
+	<div>
+		<label>Invoice Terms:</label>
+
+		<select class="form-control" ng-model="member.memberData.invoiceterms" ng-options="invoiceterms.name for invoiceterms in member.invoiceterms"></select>
+
+		<p class="help-block" ng-show="(!memberAddForm.invoiceterms.$pristine && memberAddForm.invoiceterms.$error.required) || (memberAddForm.$submitted && memberAddForm.invoiceterms.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!memberAddForm.invoiceterms.$pristine && memberAddForm.invoiceterms.$error.pattern)" class="help-block">
+			<li> Please select valid invoice terms</li>
+		</ul>
+
+	</div>
+
 
 	</div>
 	<br>

@@ -1,0 +1,62 @@
+<div class  "page-header" > 
+
+<h1>Create Posting Period</h1>
+
+</div>
+
+<form name ="postingperiodAddForm" ng-submit ="postingperiod.addPostingPeriod(postingperiodData, postingperiodAddForm.$valid)" novalidate>
+	<div class="form-group" ng-class="{'has-error': (!postingperiodAddForm.year.$valid && !postingperiodAddForm.year.$pristine) || (!postingperiodAddForm.year.$valid && postingperiodAddForm.$submitted) , 'has-success': postingperiodAddForm.year.$valid && !postingperiodAddForm.year.$pristine}">
+
+		
+		<label>Year:</label>
+<!-- 		<input class="form-control" type="text" name="year" placeholder="please enter year" ng-model="postingperiod.postingperiodData.year" ng-pattern="/^(19|20)\d{2}$/" required> 
+		<p class="help-block" ng-show="(!postingperiodAddForm.year.$pristine && postingperiodAddForm.year.$error.required) || (postingperiodAddForm.$submitted && postingperiodAddForm.year.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!postingperiodAddForm.year.$pristine && postingperiodAddForm.year.$error.pattern)" class="help-block">
+			<li> Please enter a valid year format</li>
+		</ul> -->
+
+		<select class="form-control" name="year" ng-model="postingperiod.postingperiodData.year" required>
+		  <option ng-repeat="year in postingperiod.postingperiodyears">{{year}}</option>
+		  </select>
+		</body>
+
+	</div>
+
+
+    <div class="form-group">
+        <label for="postingperiod">Month:</label>
+        <select class="form-control" ng-model="postingperiod.postingperiodData.month" placeholder="please select month" ng-options="postingperiod.name for postingperiod in postingperiod.postingperiodmonths track by postingperiod.name "></select>
+    </div>
+
+    <div class="form-group">
+        <label for="postingperiod">Status:</label>
+        <select ng-model="postingperiod.postingperiodData.status" name="status"> 
+        	<option ng-repeat="status in postingperiod.postingperidstatuses">{{status}}</option></select>
+    </div>
+
+	<br>
+	
+	<button ng-disabled="register.disabled" class="btn btn-primary" type="submit">Create Posting Period</button>
+</form>
+
+
+<br>
+
+
+<div class = "jumbotron text-center" ng-show="postingperiod.loading">
+	<span class = "glymphicon glymphicon-repeat spinner"></span>
+	<p>Loading...</p>
+
+</div>
+<br>
+
+<div class="row show-hide-message" ng-show="postingperiod.successMsg">
+	<div class="alert alert-success">{{postingperiod.successMsg}}</div>
+</div>
+	
+	<br>
+
+<div class="row show-hide-message" ng-show="postingperiod.errorMsg">
+	<div class="alert alert-danger">{{postingperiod.errorMsg}}</div>
+</div>

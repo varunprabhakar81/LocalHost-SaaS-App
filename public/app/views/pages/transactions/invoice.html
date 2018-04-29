@@ -19,14 +19,14 @@
       <!-- <div class="form-row"> -->
         <div class="form-group">
           <label for="chapter">Chapter</label>
-            <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.chapter" ng-options="u.chaptername for u in invoice.chapters"></select>
+            <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.chapter" ng-options="u.chaptername for u in invoice.chapters" ng-change="invoice.loadListValues();"></select>
             <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" class="form-control" ng-model="invoiceData.chapter.chaptername"></input>
 
         </div>
     
         <div class="form-group">
             <label for="member">Member</label>
-            <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.member" ng-change="invoice.copyBillingEmail(invoiceData.member);" ng-options="u.membername for u in invoice.members"></select>
+            <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.member" ng-change="invoice.defaultMemberInfo(invoiceData.member);" ng-options="u.membername for u in invoice.members"></select>
 
             <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" class="form-control" ng-model="invoiceData.member.membername"></input>
 
@@ -48,17 +48,24 @@
         <div class="form-row">
             <div class="form-group col-md-4">
                 <label for="invoiceData.invoicedate">Invoice Date</label>
-                <input ng-show="invoice.create && !invoice.view" type="date" class="form-control" ng-change="invoice.calcInvoiceDueDate(invoiceData);" ng-model="invoiceData.invoicedate">
-                <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" type="date" class="form-control" ng-change="invoice.calcInvoiceDueDate(invoiceData);" ng-model="invoiceData.invoicedate">
+                <!-- <input ng-show="invoice.create && !invoice.view" type="date" class="form-control" ng-change="invoice.calcInvoiceDueDate(invoiceData);" ng-model="invoiceData.invoicedate"> -->
+                <input ng-show="invoice.create && !invoice.view" type="date" class="form-control" ng-model="invoiceData.invoicedate" ng-change="invoice.calcInvoiceDueDate(invoiceData);">
+                <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" type="date" class="form-control" ng-model="invoiceData.invoicedate">
             </div>
             <div class="form-group col-md-4">
-                <label ng-show="invoice.create && !invoice.view" for="terms">Invoice Terms</label>
-                <!-- <input type="text" class="form-control" id="terms" placeholder="Terms"> -->
-                <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.invoiceterms" ng-change="invoice.calcInvoiceDueDate(invoiceData);" ng-options="terms.name for terms in invoice.invoiceTerms"></select>
+               <!--  <label ng-show="invoice.create && !invoice.view" for="terms">Invoice Terms</label>
 
-                <!-- *!! Fix Terms Name -->
+                <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.invoiceterms" ng-change="invoice.calcInvoiceDueDate(invoiceData);" ng-options="terms.name for terms in invoice.invoiceterms"></select>
+
+
                 <label ng-show="!invoice.create && invoice.view" for="terms">Invoice Terms (Days)</label>
-                <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" class="form-control" ng-model="invoiceData.invoiceterms"></input>
+                <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" class="form-control" ng-model="invoiceData.invoiceterms"></input> -->
+
+                <label for="invoiceterms">Invoice Terms</label>
+                <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.invoiceterms" ng-options="invoiceterm.name for invoiceterm in invoice.invoiceterms track by invoiceterm.name" ng-change="invoice.calcInvoiceDueDate(invoiceData);"></select>
+                <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" class="form-control" ng-value="invoiceData.invoiceterms.name"></input>
+
+
 
             </div>
             <div class="form-group col-md-4">
@@ -69,14 +76,13 @@
         </div>
         <div class="form-row">
             <div class="form-group col-md-6">
-                <label>Posting Period:</label>
-                <label ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.postingperiod" ng-disabled="!invoiceData.invoicedate">{{invoiceData.invoicedate | date:'MM-yyyy'}}</label>
-                <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" class="form-control" ng-show="!invoice.create && invoice.view" ng-model="invoiceData.postingperiod"></input>
+                <label for="postingperiod">Posting Period:</label>
+                <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.postingperiod" ng-options="postingperiod.year + ' : ' + postingperiod.month.name for postingperiod in invoice.postingperiods track by postingperiod._id "></select>
+                <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" class="form-control" ng-value="invoiceData.postingperiod.year+ ' : ' + invoiceData.postingperiod.month.name"></input>
             </div>
             <div class="form-group col-md-6">
                 <label for="araccount">Accounts Receivable Account</label>
-<!--                 <input type="text" class="form-control" id="araccount" placeholder="Accounts Receivable Account"> -->
-                <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.aracct" ng-options="araccount.glaccountnumber + ' - ' + araccount.glaccountname for araccount in invoice.araccounts"></select>
+                <select ng-show="invoice.create && !invoice.view" class="form-control" ng-model="invoiceData.aracct" ng-options="araccount.glaccountnumber + ' - ' + araccount.glaccountname for araccount in invoice.araccounts track by araccount._id"></select>
                 <input ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" ng-show="!invoice.create && invoice.view" class="form-control" ng-value="invoiceData.aracct.glaccountnumber+ ' - ' + invoiceData.aracct.glaccountname"></input>
             </div>
         </div>
@@ -117,7 +123,7 @@
                 <input ng-show="invoice.create && !invoice.view" class="form-control" type="checkbox" ng-model="line.selected">
             </td>
             <td>
-                <select  ng-show="invoice.create && !invoice.view" class="form-control" name="repeatSelect" id="repeatSelect" ng-model="line.item" ng-options="u.itemname for u in invoice.items">
+                <select  ng-show="invoice.create && !invoice.view" class="form-control" name="repeatSelect" id="repeatSelect" ng-model="line.item" ng-options="u.itemname for u in invoice.items" ng-change="invoice.defaultRate(line);">
                 </select>
                 <input  ng-show="!invoice.create && invoice.view" ng-disabled="!invoice.create && invoice.view && !invoice.enableedit" class="form-control" ng-model="line.item.itemname">
                 </input>

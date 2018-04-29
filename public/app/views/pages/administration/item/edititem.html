@@ -25,9 +25,6 @@
 
     <div>
         <label>Income Account:</label>
-<!--         <input ng-disabled="editItem.disabled" class="form-control" type="text" name="itemincomeaccount" placeholder="please enter item itemincomeaccount" ng-model="newPrimaryInfo.itemincomeaccount" ng-pattern="/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/" required> -->
-
-<!--         <select class="form-control" ng-model="itemincomeaccount" ng-options="incomeaccount.glaccountnumber + ' - ' + incomeaccount.glaccountname for incomeaccount in item.incomeaccounts"></select> -->
 
        <select ng-model="newPrimaryInfo.incomeacct" name="incomeacct" ng-options="incomeaccount.glaccountnumber + ' - ' + incomeaccount.glaccountname for incomeaccount in editItem.incomeaccounts track by incomeaccount._id"></select>
 
@@ -38,6 +35,16 @@
         </ul>
     </div>
     <br>
+    <div ng-class="{ 'has-success':(editItem.PrimaryInfoForm.rate.$valid && !editItem.PrimaryInfoForm.rate.$pristine), 'has-error':(!editItem.PrimaryInfoForm.rate.$valid && !editItem.PrimaryInfoForm.rate.$pristine) || (!PrimaryInfoForm.rate.$valid && PrimaryInfoForm.$submitted) }">
+        <label>Rate:</label>
+        <input ng-disabled="editItem.disabled" class="form-control" type="integer" name="rate" placeholder="please enter item rate" ng-model="newPrimaryInfo.rate" ng-pattern="/^[a-zA-Z\d\-_\s]+$/" required>
+        <p class="help-block" ng-show="(!editItem.PrimaryInfoForm.rate.$pristine && PrimaryInfoForm.rate.$error.required) || (editItem.PrimaryInfoForm.$submitted && editItem.PrimaryInfoForm.rate.$error.required)">This field is required</p>
+        <ul ng-show="(!editItem.PrimaryInfoForm.rate.$pristine && editItem.PrimaryInfoForm.rate.$error.pattern)" class="help-block">
+            <li> Must be a valid integer</li>
+        </ul>
+    </div>
+    <br>
+
     <!-- Submit Button -->
     <button ng-disabled="editItem.disabled" class="btn btn-primary" type="submit">Update</button>
 </form>

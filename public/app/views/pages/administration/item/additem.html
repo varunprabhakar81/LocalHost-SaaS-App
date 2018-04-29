@@ -33,6 +33,21 @@
 		</ul>
 
 	</div>
+
+	<br>
+	<div class="form-group" ng-class="{'has-error': (!itemAddForm.rate.$valid && !itemAddForm.rate.$pristine) || (!itemAddForm.rate.$valid && itemAddForm.$submitted) , 'has-success': itemAddForm.rate.$valid && !itemAddForm.rate.$pristine}">
+
+		
+		<label>Rate:</label>
+		<input class="form-control" type="integer" name="rate" placeholder="please enter item rate" ng-model="item.itemData.rate" ng-pattern="/^([+-]?[1-9]\d*|0)$/" required>
+		<p class="help-block" ng-show="(!itemAddForm.rate.$pristine && itemAddForm.rate.$error.required) || (itemAddForm.$submitted && itemAddForm.rate.$error.required)" >This field is required</p>
+
+		<ul ng-show="(!itemAddForm.rate.$pristine && itemAddForm.rate.$error.pattern)" class="help-block">
+			<li> Must be a valid integer</li>
+		</ul>
+
+	</div>
+
 	<br>
 	
 	<button ng-disabled="register.disabled" class="btn btn-primary" type="submit">Create Item</button>

@@ -79,7 +79,7 @@
 		<tr ng-repeat="glline in glreport.gllinestoreport |orderBy: 'date'|filter: searchFilter |limitTo: glreport.limit">
 			<td>{{glline.chapter.chaptername }}</td>
 			<td>{{glline.date | date:'MM-dd-yyyy'}}</td>
-			<td>{{glline.postingperiod}}</td>
+			<td>{{glline.postingperiod.year}} : {{glline.postingperiod.month.name}}</td>
 			<td>{{glline.glacct.glaccountnumber}} - {{glline.glacct.glaccountname}}</td>
 			<td>$ {{glline.debitamt }}</td>
 			<td>$ {{glline.creditamt }}</td>

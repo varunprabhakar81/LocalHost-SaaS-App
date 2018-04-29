@@ -1,6 +1,6 @@
 angular.module('memberController', ['memberServices'])
 
-.controller('memberCtrl', function($http, $location, $timeout, $scope, Member) {
+.controller('memberCtrl', function($http, $location, $timeout, $scope, Member, GLAccount, Config, Chapter) {
 
     var app = this;
 
@@ -13,6 +13,8 @@ angular.module('memberController', ['memberServices'])
     app.searchLimit = undefined; // Set the default search page results limit to zero
     app.showMemberEditModal = false;
     app.choiceMade = false;
+
+    app.invoiceterms = Config.invoiceterms;
     
     this.addMember = function(memberData, valid) {
         app.disabled = true;
@@ -78,8 +80,50 @@ angular.module('memberController', ['memberServices'])
         });
     }
 
+    function getChapters() {
+        Chapter.getChapters().then(function(data) {
+            // Check if able to get data from database
+            if (data.data.success) {
+                // Check which permissions the logged in user has
+                if (data.data.permission === 'admin' || data.data.permission === 'moderator') {
+                    app.chapters = data.data.chapters; // Assign members from database to variable
+                    app.loading = false; // Stop loading icon
+                    app.accessDenied = false; // Show table
+
+                    // Check if logged in user is an admin or moderator
+                    if (data.data.permission === 'admin') {
+                        app.editAccess = true; // Show edit button
+                        app.deleteAccess = true; // Show delete button
+                    } else if (data.data.permission === 'moderator') {
+                        app.editAccess = true; // Show edit button
+                    }
+                } else {
+                    app.errorMsg = 'Insufficient Permissions'; // Reject edit and delete options
+                    app.loading = false; // Stop loading icon
+                }
+            } else {
+                app.errorMsg = data.data.message; // Set error message
+                app.loading = false; // Stop loading icon
+            }
+        });
+    }
+
+    var araccountstype = "Accounts Receivable";
+    
+    app.araccounts = {};
+
+    // Function: get the glaccount that needs to be edited
+    GLAccount.getGLAccountByType(araccountstype).then(function(data) {
+        // Check if the user's _id was found in database
+        if (data.data.success) {
+            app.araccounts = data.data.glaccount;
+        } else {
+             console.log(data.data.message); // Set error message
+        }
+    });
 
     getMembers(); // Invoke function to get members from databases
+    getChapters();
 
     app.memberEditModal = function() {
         $("#memModal").modal({ backdrop: "static" }); // Open modal
@@ -185,62 +229,85 @@ angular.module('memberController', ['memberServices'])
 })
 
 // Controller: Used to edit users
-.controller('editMemberCtrl', function($scope, $routeParams, User, Member, $timeout) {
+.controller('editMemberCtrl', function($scope, $routeParams, User, Member, $timeout, $location, GLAccount, Config) {
 
     var app = this;
-    $scope.membernameTab = 'active'; // Set the 'membername' tab to the default active tab
-    app.phase1 = true; // Set the 'membername' tab to default view
+    $scope.PrimaryInfoTab = 'active'; // Set the 'itemname' tab to the default active tab
+    app.phase1 = true; // Set the 'itemname' tab to default view
 
-    // Function: get the member that needs to be edited
+    $scope.newPrimaryInfo = {};
+
+    var araccountstype = "Accounts Receivable";
+    
+    app.araccounts = {};
+    app.invoiceterms = Config.invoiceterms;
+
+    // Function: get the glaccount that needs to be edited
+    GLAccount.getGLAccountByType(araccountstype).then(function(data) {
+        // Check if the user's _id was found in database
+        if (data.data.success) {
+            app.araccounts = data.data.glaccount;
+        } else {
+             console.log(data.data.message); // Set error message
+        }
+    });
+
+
     Member.getMember($routeParams.id).then(function(data) {
         // Check if the user's _id was found in database
         if (data.data.success) {
-            $scope.newMemberName = data.data.member.membername; // Display member name in scope
-            $scope.newEmail = data.data.member.email; // Display member email in scope
-            app.currentMember = data.data.member._id; // Get user's _id for update functions
+            $scope.newPrimaryInfo.membername = data.data.member.membername;
+            $scope.newPrimaryInfo.email = data.data.member.email;
+            $scope.newPrimaryInfo.aracct = data.data.member.aracct;
+            $scope.newPrimaryInfo.invoiceterms = data.data.member.invoiceterms;
+
+            app.currentItem = data.data.member._id; // Get user's _id for update functions
         } else {
             app.errorMsg = data.data.message; // Set error message
         }
     });
 
-    // Function: Set the membername pill to active
-    app.membernamePhase = function() {
-        $scope.membernameTab = 'active'; // Set member name list to active
-        $scope.emailTab = 'default'; // Clear email tab
-        app.phase1 = true; // Set membername tab active
-        app.phase2 = false; // Set email tab inactive
+    app.PrimaryInfoPhase = function() {
+        $scope.PrimaryInfoTab = 'active'; // Set item name list to active
+        $scope.AdditionalInfoTab = 'default'; // Clear website tab
+        app.phase1 = true; // Set itemname tab active
+        app.phase2 = false; // Set website tab inactive
         app.errorMsg = false; // Clear error message
     };
 
-    // Function: Set the e-mail pill to active
-    app.emailPhase = function() {
-        $scope.membernameTab = 'default'; // Clear member name list to active
-        $scope.emailTab = 'active'; // Set email tab
-        app.phase1 = false; // Set membername tab inactive
-        app.phase2 = true; // Set email tab active
+    app.AdditionalInfoPhase = function() {
+        $scope.PrimaryInfoTab = 'default'; // Set item name list to active
+        $scope.AdditionalInfoTab = 'active'; // Clear website tab
+        app.phase1 = false; // Set itemname tab active
+        app.phase2 = true; // Set website tab inactive
         app.errorMsg = false; // Clear error message
     };
 
-    // Function: Update the member's name
-    app.updateMemberName = function(newMemberName, valid) {
+    app.updatePrimaryInfo = function(newPrimaryInfo, valid) {
         app.errorMsg = false; // Clear any error messages
         app.disabled = true; // Disable form while processing
-        // Check if the membername being submitted is valid
+        // Check if the itemname being submitted is valid
         if (valid) {
             var memberObject = {}; // Create a user object to pass to function
-            memberObject._id = app.currentMember; // Get _id to search database
-            memberObject.membername = $scope.newMemberName; // Set the new name to the user
-            // Runs function to update the user's name
+            memberObject._id = app.currentItem; // Get _id to search database
+            memberObject.membername = newPrimaryInfo.membername;
+            memberObject.email = newPrimaryInfo.email;
+            memberObject.aracct = newPrimaryInfo.aracct;
+            memberObject.invoiceterms = newPrimaryInfo.invoiceterms;
+
             Member.editMember(memberObject).then(function(data) {
                 // Check if able to edit the user's name
                 if (data.data.success) {
                     app.successMsg = data.data.message; // Set success message
                     // Function: After two seconds, clear and re-enable
                     $timeout(function() {
-                        app.membernameForm.name.$setPristine();
-                        app.membernameForm.name.$setUntouched();
+                        // $scope.PrimaryInfoForm.itemname.$setPristine();
+                        // $scope.PrimaryInfoForm.itemname.$setUntouched();
+                        // $scope.PrimaryInfoForm.incomeacct.$setPristine();
+                        // $scope.PrimaryInfoForm.incomeacct.$setUntouched();
                         app.successMsg = false; // Clear success message
                         app.disabled = false; // Enable form for editing
+                        $location.path('/managemembers');
                     }, 2000);
                 } else {
                     app.errorMsg = data.data.message; // Clear any error messages
@@ -253,35 +320,8 @@ angular.module('memberController', ['memberServices'])
         }
     };
 
-    // Function: Update the member's email
-    app.updateEmail = function(newEmail, valid) {
-        app.errorMsg = false; // Clear any error messages
-        app.disabled = true; // Disable form while processing
-        // Check if the membername being submitted is valid
-        if (valid) {
-            var memberObject = {}; // Create a user object to pass to function
-            memberObject._id = app.currentMember; // Get _id to search database
-            memberObject.email = $scope.newEmail; // Set the new email to the member
-            // Runs function to update the user's name
-            Member.editMember(memberObject).then(function(data) {
-                // Check if able to edit the user's name
-                if (data.data.success) {
-                    app.successMsg = data.data.message; // Set success message
-                    // Function: After two seconds, clear and re-enable
-                    $timeout(function() {
-                        app.emailForm.email.$setPristine();
-                        app.emailForm.email.$setUntouched();
-                        app.successMsg = false; // Clear success message
-                        app.disabled = false; // Enable form for editing
-                    }, 2000);
-                } else {
-                    app.errorMsg = data.data.message; // Clear any error messages
-                    app.disabled = false; // Enable form for editing
-                }
-            });
-        } else {
-            app.errorMsg = 'Please ensure form is filled out properly'; // Set error message
-            app.disabled = false; // Enable form for editing
-        }
+    app.updateAdditionalInfo = function(newAdditionalInfo, valid) {
+        console.log('Additional Info Placeholder');
     };
+
 });

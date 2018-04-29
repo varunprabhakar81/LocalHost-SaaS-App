@@ -14,7 +14,8 @@ var nameValidator = [
 
 var itemSchema = new Schema({
   itemname: {type: String, required: true, unique: true, validate: nameValidator},
-  incomeacct: { type: Schema.Types.ObjectId, ref: 'GLAccount', required: true}
+  incomeacct: { type: Schema.Types.ObjectId, ref: 'GLAccount', required: true}, 
+  rate: {type: Number}
 });
 
 module.exports = mongoose.model('Item', itemSchema);

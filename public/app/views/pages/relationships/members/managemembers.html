@@ -71,11 +71,15 @@
 		<tr>
 			<th>Member Name</th>
 			<th>Email</th>
+			<th>Accounts Receivable Account</th>
+			<th>Invoice Terms</th>
 			<th></th>	
 		</tr>
 		<tr ng-repeat="mem in member.members |filter: searchFilter |limitTo: member.limit">
 			<td>{{mem.membername }}</td>
 			<td>{{mem.email}}</td>
+			<td>{{mem.aracct.glaccountnumber}} - {{mem.aracct.glaccountname}}</td>
+			<td>{{mem.invoiceterms.name}}</td>
 			<td>
 				<a href="/editmember/{{mem._id}}">
 					<button type="button" ng-show="member.editAccess" class="btn btn-primary">Edit</button>

@@ -239,6 +239,7 @@ angular.module('itemController', ['itemServices'])
         if (data.data.success) {
             $scope.newPrimaryInfo.itemname = data.data.item.itemname;
             $scope.newPrimaryInfo.incomeacct = data.data.item.incomeacct;
+            $scope.newPrimaryInfo.rate = data.data.item.rate;
 
             app.currentItem = data.data.item._id; // Get user's _id for update functions
         } else {
@@ -271,6 +272,7 @@ angular.module('itemController', ['itemServices'])
             itemObject._id = app.currentItem; // Get _id to search database
             itemObject.itemname = newPrimaryInfo.itemname; // Set the new name to the user
             itemObject.incomeacct = newPrimaryInfo.incomeacct; // Set the new name to the user
+            itemObject.rate = newPrimaryInfo.rate; // Set the new name to the user
 
             // Runs function to update the user's name
             Item.editItem(itemObject).then(function(data) {

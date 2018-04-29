@@ -1,0 +1,153 @@
+<div class  "page-header" > 
+	<h1>Manage Posting Periods</h1>
+</div>
+
+<br>
+
+<div class="showmore">
+	<div class="col-lg-6">
+		<form>
+			<div class="form-row">
+				
+				<div class="col">
+					<span class="input-group-text"> Results to display:</span>
+				</div>
+				<div class="col">
+					<input type="text" class="form-control" ng-model="number">&nbsp&nbsp
+				</div>
+				<div class="col">
+					<button type="submit" ng-click="postingperiod.showMore(number);" class="btn btn-success">Apply Filter</button>
+				</div>
+				<div class="col">
+					<button type="button" ng-click="postingperiod.showAll(number);" class="btn btn-warning">Show All</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<nav class="navbar navbar-light">
+	<form class="form-inline">
+		<input class="form-control mr-sm-2" type="search" placeholder="Search for..." aria-label="Search" ng-model="searchKeyword">
+		<button class="btn btn-outline-secondary my-2 my-sm-0" type="submit" ng-click="postingperiod.search(searchKeyword, number);">Search</button>&nbsp
+		<button class="btn btn-outline-secondary my-2 my-sm-0" type="button" ng-click="postingperiod.clear();">Clear</button>&nbsp
+		<!-- Advanced Search Button -->
+		<!-- <a href="/search">
+			<button type="button" class="btn btn-outline-secondary my-2 my-sm-0">Advanced Search</button>
+		</a> -->
+
+	</form>
+</nav>
+
+<!-- Total Search Results -->
+<div ng-show="searchFilter !== undefined">
+	<p><strong>Total results: </strong>{{ (postingperiod.postingperiods | filter: searchFilter).length }}</p>
+
+</div>
+
+<!-- Results Being Shown -->
+<div ng-show="searchFilter !== undefined">
+	<p><strong>Showing: </strong>{{( postingperiod.postingperiods | filter: searchFilter | limitTo: postingperiod.limit).length }}</p>
+</div>
+
+
+
+<!-- Custom Error Message -->
+<div class="row show-hide-message" ng-show="postingperiod.showMoreError">
+	<div class="alert alert-danger">{{ postingperiod.showMoreError }}</div>
+</div>
+
+<br>
+
+<div class="panel panel-primary">
+	<p align = "right">
+		<a href="/addpostingperiod" align="right">
+			<button type="button" ng-show="postingperiod.editAccess" align="right" class="btn btn-primary">Add Posting Period</button>
+		</a>
+	</p>
+
+
+	<table class="table table-striped">
+		<tr>
+			<th>Year</th>
+			<th>Month</th>
+			<th>Status</th>
+			<th></th>	
+		</tr>
+		<!-- !** Fix sorting -->
+		<tr ng-repeat="period in postingperiod.postingperiods |orderBy: ['year', 'month.id'] |filter: searchFilter |limitTo: postingperiod.limit">
+			<td>{{period.year }}</td>
+			<td>{{period.month.name}}</td>
+			<td>{{period.status}}</td>
+
+			<!-- console.log(app.postingperiods[0].incomeacct.glaccountnumber+' - '+app.postingperiods[0].incomeacct.glaccountname); -->
+			<td>
+				<a href="/editpostingperiod/{{period._id}}">
+					<button type="button" ng-show="postingperiod.editAccess" class="btn btn-success">Change Period Status</button>
+				</a>
+<!-- 				<button type="button" ng-click = "postingperiod.deletePostingPeriod(it.postingperiodname);" ng-show="postingperiod.deleteAccess" class="btn btn-danger">Delete</button> -->
+<!-- 				<a href="/edit/{{postingperiod._id}}">
+					<button type="button" ng-show="management.editAccess" class="btn btn-primary">Edit</button>
+				</a> -->
+				<!-- <button type="button" ng-click="management.deleteUser(person.username);" ng-show="management.deleteAccess" class="btn btn-danger">Delete</button> -->
+			</td>
+		</tr>
+	</table>
+
+</div>
+
+<br>
+<div class="showmore">
+	<div class="col-lg-6">
+		<div class="input-group">
+			<span class="input-group-text"> Results to display:</span>
+			<input type="text" class="form-control" ng-model="number">&nbsp&nbsp
+			<button type="button" ng-click="postingperiod.showMore(number);" class="btn btn-success ">Apply Filter</button>
+			<button type="button" ng-click="postingperiod.showAll(number);" class="btn btn-warning">Show All</button>
+		</div>
+	</div>
+</div>
+
+
+
+    <!-- BootstrapJS Modal -->
+    <div class="modal fade" id="postingperiodModal" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+<!--             <button ng-hide="main.hideButton" type="button" ng-click="main.endSession();" class="close" data-dismiss="modal">&times;</button> -->
+            <!-- Modal Header -->
+            <h4 class="modal-title">Edit Posting Period</h4>
+          </div>
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <p>Edit Posting Period Details</p>
+          </div>
+          <div class="modal-footer">
+            <!-- Modal 'Yes' & 'No' Buttons -->
+            <button type="button" ng-click="" class="btn btn-primary" data-dismiss="modal">Ok</button>
+            <button type="button" ng-click="" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- BootstrapJS Modal -->
+
+
+
+<!-- $scope.showItemModal = function() {
+  $scope.showItemEditModal = true;
+};
+
+$scope.updateItem = function() {
+	//edit postingperiod
+  $scope.showItemEditModal = false;
+};
+
+$scope.cancelItemUpdate = function() {
+  $scope.showItemEditModal = false;
+}; -->
+

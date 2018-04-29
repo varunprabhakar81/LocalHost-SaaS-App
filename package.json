@@ -18,6 +18,7 @@
     "angularjs-datepicker": "^2.1.23",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.2",
+    "bootstrap-select": "^1.13.1",
     "datepicker": "0.0.0",
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",

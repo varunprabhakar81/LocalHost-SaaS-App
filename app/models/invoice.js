@@ -15,6 +15,11 @@ var emailValidator = [
   })
 ];
 
+var termsSchema = new Schema({
+  name: {type: String, required: true},
+  days: { type: Number, required: true}
+});
+
 var invoiceSchema = new Schema({
   amountdue: { type: Number, required: true}, 
   amountpaid: { type: Number, required: true},
@@ -24,9 +29,9 @@ var invoiceSchema = new Schema({
   chapter: { type: Schema.Types.ObjectId, ref: 'Chapter', lowercase: true, required: true},
   invoicedate: { type: Date, lowercase: true, required: true},
   invoiceduedate: { type: Date, lowercase: true, required: true},
-  invoiceterms: { type: Number, lowercase: true, required: true},
+  invoiceterms: termsSchema,
   member: { type: Schema.Types.ObjectId, ref: 'Member', required: true},
-  postingperiod: { type: String, required: true},
+  postingperiod: { type: Schema.Types.ObjectId, ref: 'PostingPeriod', required: true},
   lines: [{ type: Schema.Types.ObjectId, ref: 'InvoiceLine'}]
 });
 

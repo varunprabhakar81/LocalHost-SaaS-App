@@ -9,7 +9,7 @@ var glLineSchema = new Schema({
   glacct: { type: Schema.Types.ObjectId, ref: 'GLAccount', required: true},
   journal: { type: Schema.Types.ObjectId, ref: 'JournalEntry'},
   transactionsource: { type: Schema.Types.ObjectId},
-  postingperiod: { type: String, required: true}
+  postingperiod: { type: Schema.Types.ObjectId, ref: 'PostingPeriod', required: true}
 });
 
 module.exports = mongoose.model('GLLine', glLineSchema);

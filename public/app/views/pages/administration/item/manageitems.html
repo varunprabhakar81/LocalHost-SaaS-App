@@ -71,11 +71,13 @@
 		<tr>
 			<th>Name</th>
 			<th>Income Account</th>
+			<th>Rate</th>
 			<th></th>	
 		</tr>
 		<tr ng-repeat="it in item.items |orderBy: 'itemname'|filter: searchFilter |limitTo: item.limit">
 			<td>{{it.itemname }}</td>
 			<td>{{it.incomeacct.glaccountnumber}} - {{it.incomeacct.glaccountname}}</td>
+			<td>$ {{it.rate}}</td>
 
 			<!-- console.log(app.items[0].incomeacct.glaccountnumber+' - '+app.items[0].incomeacct.glaccountname); -->
 			<td>

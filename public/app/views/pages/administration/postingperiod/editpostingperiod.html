@@ -1,0 +1,74 @@
+<div class  "page-header" > 
+    <h1>Edit Posting Period</h1>
+</div>
+
+<br>
+
+<nav>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <a class="nav-item nav-link PrimaryInfoTab" ng-click="editPostingPeriod.PrimaryInfoPhase();" ng-class="PrimaryInfoTab" data-toggle="tab" href="#" role="presentation" aria-controls="PrimaryInfoTab">Primary Information</a>
+    <a class="nav-item nav-link AdditionalInfoTab" ng-click="editPostingPeriod.AdditionalInfoPhase();" ng-class="AdditionalInfoTab" data-toggle="tab" href="#" role="presentation" aria-controls="AdditionalInfoTab">Additional Information</a>
+  </div>
+</nav>
+
+
+<form name="editPostingPeriod.PrimaryInfoForm" ng-show="editPostingPeriod.phase1" ng-submit="editPostingPeriod.updatePrimaryInfo(newPrimaryInfo, editPostingPeriod.PrimaryInfoForm.$valid)" novalidate>
+
+    <div ng-class="{ 'has-success':(editPostingPeriod.PrimaryInfoForm.year.$valid && !editPostingPeriod.PrimaryInfoForm.year.$pristine), 'has-error':(!editPostingPeriod.PrimaryInfoForm.year.$valid && !editPostingPeriod.PrimaryInfoForm.year.$pristine) || (!PrimaryInfoForm.year.$valid && PrimaryInfoForm.$submitted) }">
+        <label>Year:</label>
+        <input ng-disabled="true" class="form-control" type="text" name="year" placeholder="please enter year" ng-model="newPrimaryInfo.year" required>
+        <p class="help-block" ng-show="(!editPostingPeriod.PrimaryInfoForm.year.$pristine && PrimaryInfoForm.year.$error.required) || (editPostingPeriod.PrimaryInfoForm.$submitted && editPostingPeriod.PrimaryInfoForm.year.$error.required)">This field is required</p>
+        <ul ng-show="(!editPostingPeriod.PrimaryInfoForm.year.$pristine && editPostingPeriod.PrimaryInfoForm.year.$error.pattern)" class="help-block">
+            <li> Must not contain any special characters</li>
+        </ul>
+    </div>
+    <br>
+
+    <div ng-class="{ 'has-success':(editPostingPeriod.PrimaryInfoForm.month.$valid && !editPostingPeriod.PrimaryInfoForm.month.$pristine), 'has-error':(!editPostingPeriod.PrimaryInfoForm.month.$valid && !editPostingPeriod.PrimaryInfoForm.month.$pristine) || (!PrimaryInfoForm.month.$valid && PrimaryInfoForm.$submitted) }">
+        <label>Month:</label>
+        <input ng-disabled="true" class="form-control" type="text" name="month" placeholder="please enter month" ng-model="newPrimaryInfo.month.name" required>
+        <p class="help-block" ng-show="(!editPostingPeriod.PrimaryInfoForm.month.$pristine && PrimaryInfoForm.month.$error.required) || (editPostingPeriod.PrimaryInfoForm.$submitted && editPostingPeriod.PrimaryInfoForm.month.$error.required)">This field is required</p>
+        <ul ng-show="(!editPostingPeriod.PrimaryInfoForm.month.$pristine && editPostingPeriod.PrimaryInfoForm.month.$error.pattern)" class="help-block">
+            <li> Must not contain any special characters</li>
+        </ul>
+    </div>
+    <br>
+
+    <div ng-class="{ 'has-success':(editPostingPeriod.PrimaryInfoForm.status.$valid && !editPostingPeriod.PrimaryInfoForm.status.$pristine), 'has-error':(!editPostingPeriod.PrimaryInfoForm.status.$valid && !editPostingPeriod.PrimaryInfoForm.status.$pristine) || (!PrimaryInfoForm.status.$valid && PrimaryInfoForm.$submitted) }">
+        <label>Status:</label>
+        <!-- <select ng-model="newPrimaryInfo.status" name="status" ng-options="status as status.value for status in statuses track by status.value"></select> -->
+        <select ng-model="newPrimaryInfo.status" name="status"> <option ng-repeat="status in statuses">{{status}}</option></select>
+        <p class="help-block" ng-show="(!editPostingPeriod.PrimaryInfoForm.status.$pristine && PrimaryInfoForm.status.$error.required) || (editPostingPeriod.PrimaryInfoForm.$submitted && editPostingPeriod.PrimaryInfoForm.status.$error.required)">This field is required</p>
+        <ul ng-show="(!editPostingPeriod.PrimaryInfoForm.status.$pristine && editPostingPeriod.PrimaryInfoForm.status.$error.pattern)" class="help-block">
+            <li> Must not contain any special characters</li>
+        </ul>
+    </div>
+    <br>
+
+
+
+    <!-- Submit Button -->
+    <button ng-disabled="editPostingPeriod.disabled" class="btn btn-primary" type="submit">Update</button>
+</form>
+
+<form name="editPostingPeriod.AdditionalInfoForm" ng-show="editPostingPeriod.phase2" ng-submit="editPostingPeriod.updateAdditionalInfo(newAdditionalInfo, editPostingPeriod.AdditionalInfoForm.$valid)" novalidate>
+    <div>Placeholder</div>
+
+    <br>
+</form>
+
+<br>
+
+<!-- Custom Success Message -->
+<div class="row show-hide-message" ng-show="editPostingPeriod.successMsg">
+    <div class="alert alert-success">{{ editPostingPeriod.successMsg }}</div>
+</div>
+<!-- Custom Success Message -->
+
+<br>
+
+<!-- Custom Error Message -->
+<div class="row show-hide-message" ng-show="editPostingPeriod.errorMsg">
+    <div class="alert alert-danger">{{ editPostingPeriod.errorMsg }}</div>
+</div>
+<!-- Custom Error Message -->

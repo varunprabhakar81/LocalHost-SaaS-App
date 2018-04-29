@@ -25,9 +25,5 @@ angular.module('itemServices', [])
         return $http.put('/api/edititem/',id);
     };
 
-	// itemFactory.addTest = function() {
- //    	return $http.post('/api/testrelationships');
- //    };
-
 	return itemFactory;
 })

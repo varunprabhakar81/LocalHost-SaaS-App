@@ -24,9 +24,17 @@ var emailValidator = [
   })
 ];
 
+var termsSchema = new Schema({
+  name: {type: String},
+  days: { type: Number }
+});
+
 var MemberSchema = new Schema({
   membername: {type: String, required: true, unique: true, validate: membernameValidator},
-  email: {type: String, lowercase: true, required: true, unique: true, validate: emailValidator}
+  email: {type: String, lowercase: true, required: true, unique: true, validate: emailValidator},
+  aracct: { type: Schema.Types.ObjectId, ref: 'GLAccount'},
+  invoiceterms: termsSchema,
+  chapters: [{ type: Schema.Types.ObjectId, ref: 'Chapter'}]
 });
 
 module.exports = mongoose.model('Member', MemberSchema);
